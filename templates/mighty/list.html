@@ -1,0 +1,36 @@
+{% extends "mighty/base/base.html" %}
+
+{% block css %}
+table {
+    width: 100%;
+    text-align: center;
+    border-collapse: separate; /* Don't collapse */
+    border-spacing: 0;
+}
+
+table th {
+    border-top: 2px solid;
+    border-bottom: 2px solid;
+    border-right: 2px solid;
+}
+
+table td {
+    border-bottom: 2px solid;
+    border-right: 2px solid;
+}
+
+table th:first-child,
+table td:first-child {
+    border-left: 2px solid;
+}
+
+table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #edecec;
+}
+{% endblock %}
+
+{% block content %}
+{% include "mighty/min/list.html" %}
+{% endblock %}

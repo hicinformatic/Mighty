@@ -1,0 +1,247 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Mighty Test View</title>
+        <link rel="stylesheet" href="{% static 'css/Mtable.css' %}">
+        <style>
+        .cmds-left {float: left; }
+        .cmds-left > * { display: inline-block; }
+        .cmds-right { text-align: right; float: right; }
+        .cmds-right > * { float: right; }
+        .mighty-mtable { max-height: 500px; overflow-y: scroll; }
+        select.mighty-cmd-paginate,
+        label.mighty-cmd-search,
+        button.mighty-cmd-displayer {
+            padding: 0 5px;
+            border-radius: 5px;
+        }
+        </style>
+    </head>
+
+    <body>
+
+        <div>
+            <button id="btnperson">Person</button>
+            <button id="btncompany">Company</button>
+        </div>
+
+        <div>
+            <button id="btnpanel">Panel</button>
+            <button id="btnreference">Reference</button>
+        </div>
+
+        <div id="panel">
+            <div>
+                <label><input type="checkbox" value="person:person__last_name__icontains==aba" class="mighty-filterscbx-panel">Nom</label>
+                <label><input type="checkbox" value="company:company__denomination__icontains==spi" class="mighty-filterscbx-panel">Denominatio</label>
+            </div>
+
+            <div class="commands">
+                <div class="cmds-left">
+                    <div id="mighty-cmd-paginate-panel"></div>
+                    <div id="mighty-cmd-counter-panel"></div>
+                </div>
+                <div class="cmds-right">
+                    <div id="mighty-cmd-searchex-panel"></div>
+                    <div id="mighty-cmd-search-panel"></div>
+                    <div id="mighty-cmd-displayer-panel"></div>
+                </div>
+                <div style="clear: both; "></div>
+            </div>
+            <div id="mighty-error-panel-person" class="mighty-show-panel-person"></div>
+            <div id="mighty-error-panel-company" class="mighty-show-panel-company"></div>
+            <div id="mighty-mtable-panel" class="mighty-mtable"></div>
+        </div>
+
+        <div id="reference">
+            <div class="commands">
+                <div class="cmds-left">
+                    <div id="mighty-cmd-paginate-reference"></div>
+                    <div id="mighty-cmd-counter-reference"></div>
+                </div>
+                <div class="cmds-right">
+                    <div id="mighty-cmd-searchex-reference"></div>
+                    <div id="mighty-cmd-search-reference"></div>
+                    <div id="mighty-cmd-displayer-reference"></div>
+                </div>
+                <div style="clear: both; "></div>
+            </div>
+            <div id="mighty-error-reference-person" class="mighty-show-reference-person"></div>
+            <div id="mighty-error-reference-company" class="mighty-show-reference-company"></div>
+            <div id="mighty-mtable-reference" class="mighty-mtable"></div>
+        </div>
+
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script src="{% static 'js/Mconfig.js' %}"></script>
+        <script src="{% static 'js/Mcommon.js' %}"></script>
+        <script src="{% static 'js/Mtable.js' %}"></script>
+        <script src="{% static 'js/handlebars.min.js' %}"></script>
+        <script>
+        (function() {
+            var p_news = '[[#each events.y2019.display]][[this]][[#if @last]][[else]], [[/if]][[/each]]';
+            var p_image = '<span class="picture" style="background-image: url(\'[[person.image]]\')"></span>';
+            var p_title = '<span>[[person.first_name]] [[person.last_name]]</span>';
+            var p_link = `<a href="[[person.get_all_url.detail.url]]"><b>${p_image} ${p_title}</b></a>`;
+            var p_nat = '[[#each person.nationalities]]<img class="flag" src="[[image_url]]">[[#if @last]][[else]] [[/if]][[/each]]';
+            var p_att = '[[#if attendance_board]][[get_attendance_board]]%[[#if alerts.attendance_board.info]]<i class="fas fa-info-circle ft-si-px15" title="[[alerts.attendance_board.info]]"></i>[[/if]][[/if]]';
+
+            var c_image = '<span class="logo" style="background-image: url(\'[[company.image]]\')"></span>';
+            var c_title = '<span>[[company.display]]</span>';
+            var c_link = `<a href="[[company.get_all_url.detail.url]]"><b>${c_image} ${c_title}</b></a>`;
+            var c_news = '[[#each company.events.y2019.display]][[this]][[#if @last]][[else]], [[/if]][[/each]]';
+
+
+            var panel = new Mtable("panel", "{% url "mandate:api-mandate-list" %}", {debug: true});
+            panel.show = "person";
+            panel.is("search", true);
+            panel.is("searchex", true);
+            panel.is("paginate", true);
+            panel.is("displayer", true);
+            panel.is("counter", true);
+            panel.is("oneshow", true);
+            panel.is("order", true);
+            panel.is("filterscbx", true);
+
+            panel.add("person", "order", "person__last_name");
+            panel.column("person", {title: "Actualités", dataway: "events.y2019", template: p_news});
+            panel.column("person", {title: 'Personne concernée', dataway: 'person.last_name', order: 'person__last_name', template: p_link });
+            panel.column("person", {title: "Personne morale représentée", dataway: "company_representative"});
+            panel.column("person", {title: "Formation", dataway: "person.school", show: false});
+            panel.column("person", {title: "Twitter", dataway: "person.social", show: false, template: '[[#if person.social.twitter]][[person.social.twitter]][[/if]]'});
+            panel.column("person", {title: "Âge", dataway: "person.age", order: "person__date_birth", template: '[[#if person.age]][[person.age]] ans[[/if]]'});
+            panel.column("person", {title: "Genre", dataway: "person.gender", template: '<i class="fas fa-[[person.planet]]"></i>'});
+            panel.column("person", {title: "Nombre de Mandats", dataway: "person.count_mandate"});
+            panel.column("person", {title: "Nationalité", dataway: "person.nationalities", template: p_nat});
+            panel.column("person", {title: "Société", dataway: "company.display", order: "company__denomination", template: c_link});
+            panel.column("person", {title: "Responsabilités", dataway: "roles", template: "[[#each roles]][[this]][[#if @last]][[else]], [[/if]][[/each]]"});
+            panel.column("person", {title: "Président d'honneur", dataway: "is_president_honor", show: false, template: '[[#if is_president_honor]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "Dirigeants non exécutif", dataway: "is_dir_not_exec", show: false, template: '[[#if is_dir_not_exec]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "Dirigeants exécutif", dataway: "is_dir_exec", show: false, template: '[[#if is_dir_exec]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "Administrateur référent", dataway: "is_admin_referent", show: false, template: '[[#if is_admin_referent]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "Président Comité (lequel?)", dataway: "comittee_president"});
+            panel.column("person", {title: "Membre Comité (lequel?)", dataway: "comittee_member"});
+            panel.column("person", {title: "Censeur", dataway: "is_censor", show: false, template: '[[#if is_censor]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "ARAS", dataway: "is_aras", show: false, template: '[[#if is_aras ]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "Administrateur salarié", dataway: "is_admin_salary", show: false, template: '[[#if is_admin_salary]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "Conseil / Taux d'assiduité 2018", dataway: "attendance_board", order: 'attendance_board', template: p_att});
+            panel.column("person", {title: "Rémunération administrateur 2018", dataway: "token_total", order: 'token_total', template: '[[#if token_total]][[get_token_mill]]€[[/if]]'});
+            panel.column("person", {title: "Existence d'autres rémunérations", dataway: "token_others", order: 'token_others', template: '[[#if token_others]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "Actions détenues 2018", dataway: "stock_total", order: 'stock_total', template: '[[#if stock_total]][[get_stock_mill]][[/if]]'});
+            panel.column("person", {title: "Ancienneté dans le Conseil en 2019", dataway: "seniority", order: 'seniority', template: "[[get_seniority]]"});
+            panel.column("person", {title: "Score d'élection 2019", dataway: "score", order: 'score', template: '[[#if score]][[score]]%[[/if]]'});
+            panel.column("person", {title: "Indépendant selon la société", dataway: "independent", template: '[[#if independent]]<i class="fas fa-check"></i>[[/if]]'});
+            panel.column("person", {title: "Année de debut de premier mandat", dataway: "date_begin", template: '[[#if date_end]][[get_begin_year]][[/if]]'});
+
+            panel.add("company", "distinct", "company__id");
+            panel.add("company", "order", "company__denomination");
+            panel.column("company", {title: "Actualité 2019", dataway: "company.events", template: c_news});
+            panel.column("company", {title: "Société", dataway: "company.denomination", order: 'company__denomination', template: c_link });
+            panel.column("company", {title: "Nbr de mandats", dataway: "company.count_mandate", order: 'company__company_count'});
+            panel.column("company", {title: "SIREN", dataway: "company.siren", order: 'company__siren',  show: false});
+            panel.column("company", {title: "ISIN", dataway: "company.isin", order: 'company__isin', show: false});
+            panel.column("company", {title: "Indice", dataway: "company.index"});
+            panel.column("company", {title: "Forme de gouvernance", dataway: "company.governance"});
+            panel.column("company", {title: "Code de référence", dataway: "company.code"});
+            panel.column("company", {title: "Effectif", dataway: "company.effective"});
+            panel.column("company", {title: "Mode d'évaluation du conseil", dataway: "company.evaluation"});
+            panel.column("company", {title: "Nb actions minimum à détenir", dataway: "company.stock_min", order: 'company__stock_min'});
+            panel.column("company", {title: "Définition de l'indépendance par la société", dataway: "company.quality_independent"});
+            panel.column("company", {title: "Secrétaire du Conseil (si indiqué)", dataway: "company.secretary", order: 'company__secretary'});
+            panel.column("company", {title: "Nombre de réunions en 2018", dataway: "company.meeting_board", order: 'company__meeting_board'});
+            panel.column("company", {title: "Âge moyen", dataway: "company.avg_age", order: 'company__avg_age'});
+            
+            panel.start();
+
+            var reference = new Mtable("reference", "{% url "mandate:api-mandate-list" %}", {debug: true});
+            reference.show = "company";
+            reference.is("search", true);
+            reference.is("searchex", true);
+            reference.is("paginate", true);
+            reference.is("displayer", true);
+            reference.is("counter", true);
+            reference.is("oneshow", true);
+            reference.is("order", true);
+
+            reference.add("person", "order", "person__last_name");
+            reference.column("person", {title: "Actualités", dataway: "events.y2019", template: p_news});
+            reference.column("person", {title: 'Personne concernée', dataway: 'person.last_name', order: 'person__last_name', template: p_link });
+            reference.column("person", {title: "Personne morale représentée", dataway: "company_representative"});
+            reference.column("person", {title: "Formation", dataway: "person.school", show: false});
+            reference.column("person", {title: "Twitter", dataway: "person.social", show: false, template: '[[#if person.social.twitter]][[person.social.twitter]][[/if]]'});
+            reference.column("person", {title: "Âge", dataway: "person.age", order: "person__date_birth", template: '[[#if person.age]][[person.age]] ans[[/if]]'});
+            reference.column("person", {title: "Genre", dataway: "person.gender", template: '<i class="fas fa-[[person.planet]]"></i>'});
+            reference.column("person", {title: "Nombre de Mandats", dataway: "person.count_mandate"});
+            reference.column("person", {title: "Nationalité", dataway: "person.nationalities", template: p_nat});
+            reference.column("person", {title: "Société", dataway: "company.display", order: "company__denomination", template: c_link});
+            reference.column("person", {title: "Responsabilités", dataway: "roles", template: "[[#each roles]][[this]][[#if @last]][[else]], [[/if]][[/each]]"});
+            reference.column("person", {title: "Président d'honneur", dataway: "is_president_honor", show: false, template: '[[#if is_president_honor]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "Dirigeants non exécutif", dataway: "is_dir_not_exec", show: false, template: '[[#if is_dir_not_exec]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "Dirigeants exécutif", dataway: "is_dir_exec", show: false, template: '[[#if is_dir_exec]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "Administrateur référent", dataway: "is_admin_referent", show: false, template: '[[#if is_admin_referent]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "Président Comité (lequel?)", dataway: "comittee_president"});
+            reference.column("person", {title: "Membre Comité (lequel?)", dataway: "comittee_member"});
+            reference.column("person", {title: "Censeur", dataway: "is_censor", show: false, template: '[[#if is_censor]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "ARAS", dataway: "is_aras", show: false, template: '[[#if is_aras ]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "Administrateur salarié", dataway: "is_admin_salary", show: false, template: '[[#if is_admin_salary]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "Conseil / Taux d'assiduité 2018", dataway: "attendance_board", order: 'attendance_board', template: p_att});
+            reference.column("person", {title: "Rémunération administrateur 2018", dataway: "token_total", order: 'token_total', template: '[[#if token_total]][[get_token_mill]]€[[/if]]'});
+            reference.column("person", {title: "Existence d'autres rémunérations", dataway: "token_others", order: 'token_others', template: '[[#if token_others]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "Actions détenues 2018", dataway: "stock_total", order: 'stock_total', template: '[[#if stock_total]][[get_stock_mill]][[/if]]'});
+            reference.column("person", {title: "Ancienneté dans le Conseil en 2019", dataway: "seniority", order: 'seniority', template: "[[get_seniority]]"});
+            reference.column("person", {title: "Score d'élection 2019", dataway: "score", order: 'score', template: '[[#if score]][[score]]%[[/if]]'});
+            reference.column("person", {title: "Indépendant selon la société", dataway: "independent", template: '[[#if independent]]<i class="fas fa-check"></i>[[/if]]'});
+            reference.column("person", {title: "Année de debut de premier mandat", dataway: "date_begin", template: '[[#if date_end]][[get_begin_year]][[/if]]'});
+
+            reference.add("company", "distinct", "company__id");
+            reference.add("company", "order", "company__denomination");
+            reference.column("company", {title: "Actualité 2019", dataway: "company.events", template: c_news});
+            reference.column("company", {title: "Société", dataway: "company.denomination", order: 'company__denomination', template: c_link });
+            reference.column("company", {title: "Nbr de mandats", dataway: "company.count_mandate", order: 'company__company_count'});
+            reference.column("company", {title: "SIREN", dataway: "company.siren", order: 'company__siren',  show: false});
+            reference.column("company", {title: "ISIN", dataway: "company.isin", order: 'company__isin', show: false});
+            reference.column("company", {title: "Indice", dataway: "company.index"});
+            reference.column("company", {title: "Forme de gouvernance", dataway: "company.governance"});
+            reference.column("company", {title: "Code de référence", dataway: "company.code"});
+            reference.column("company", {title: "Effectif", dataway: "company.effective"});
+            reference.column("company", {title: "Mode d'évaluation du conseil", dataway: "company.evaluation"});
+            reference.column("company", {title: "Nb actions minimum à détenir", dataway: "company.stock_min", order: 'company__stock_min'});
+            reference.column("company", {title: "Définition de l'indépendance par la société", dataway: "company.quality_independent"});
+            reference.column("company", {title: "Secrétaire du Conseil (si indiqué)", dataway: "company.secretary", order: 'company__secretary'});
+            reference.column("company", {title: "Nombre de réunions en 2018", dataway: "company.meeting_board", order: 'company__meeting_board'});
+            reference.column("company", {title: "Âge moyen", dataway: "company.avg_age", order: 'company__avg_age'});
+
+            reference.start();
+            
+            var pan = $("#panel");
+            var btnpanel = $("#btnpanel");
+            var ref = $("#reference");
+            var btnreference = $("#btnreference");
+            var btnperson = $("#btnperson");
+            var btncompany = $("#btncompany");
+            ref.hide();
+            
+            btnpanel.click(function(){
+                pan.show();
+                ref.hide();
+            });
+            
+            btnreference.click(function(){
+                ref.show();
+                pan.hide();
+            });
+
+            btnperson.click(function(){
+                panel.oneshow("person");
+                reference.oneshow("person");
+            });
+
+            btncompany.click(function(){
+                panel.oneshow("company");
+                reference.oneshow("company");
+            });
+        })();
+        </script>
+    </body>
+</html>

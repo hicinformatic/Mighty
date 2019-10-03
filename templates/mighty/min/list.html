@@ -1,0 +1,44 @@
+{% load mighty %}
+
+{% with opts.app_label|add:":"|add:opts.model_name|add:"-create" as reverse %}
+<a href="{{ object_list.0.get_create_url }}">{{ title.create }}</a>
+{% endwith %}
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Edit</th>
+            <th>Enable/Disable</th>
+            {% if can_askfor %}
+            <th>Ask for change</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for object in object_list %}
+        <tr>
+            <td>
+                <a href="{{ object.get_absolute_url }}">{{ object.display }}</a>
+            </td>
+            <td>
+                <a href="{{ object.get_update_url }}">{{ object.title.update }}</a>
+            </td>
+            <td>
+                {% if object.is_disable %}
+                <a href="{{ object.get_enable_url }}">{{ object.title.enable }}</a>
+                {% else %}
+                <a href="{{ object.get_disable_url }}">{{ object.title.disable }}</a>
+                {% endif %}
+            </td>
+            {% if can_askfor %}
+            <td>
+                {% if can_change %}
+                <a href="{{ object.get_urls.askfor_change_perm }}">Ask for change permission</a>
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

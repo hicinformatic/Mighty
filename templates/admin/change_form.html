@@ -1,0 +1,19 @@
+{% extends "admin/change_form.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+.disablelink {
+    margin: 0 0 0 8px;
+    background: coral!important;
+}
+.enablelink {
+    margin: 0 0 0 8px;
+    background: LimeGreen!important;
+}
+.submit-row {
+    position: sticky;
+    top: 0;
+}
+</style>
+{% endblock %}
