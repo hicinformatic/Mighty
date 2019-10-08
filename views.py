@@ -7,13 +7,17 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
+from django.contrib.auth.decorators import user_passes_test
+
+from django.contrib.auth.mixins import PermissionRequiredMixin
+
 
 from mighty.functions import logger
 
 guardian = True if 'guardian' in settings.INSTALLED_APPS else False
 tpl = lambda a, n, t: ['%s/%s_%s.html' % (a, n, t), '%s/%s.html' % (a, t), '%s.html' % t, 'mighty/%s.html' % t]
 
-class FormView(FormView):
+class FormView(PermissionRequiredMixin, FormView):
     title = 'FormView'
 
     def get_template_names(self):
@@ -27,7 +31,7 @@ class FormView(FormView):
         context.update({'view': 'form', 'title': self.title})
         return context
 
-class CreateView(CreateView):
+class CreateView(PermissionRequiredMixin, CreateView):
     title = 'CreateView'
 
     def dispatch(self, request, *args, **kwargs):
@@ -46,15 +50,10 @@ class CreateView(CreateView):
         context.update({'opts': self.model._meta, 'view': 'create', 'title': self.title})
         return context
 
-class UpdateView(UpdateView):
+class UpdateView(PermissionRequiredMixin, UpdateView):
     slug_field = "uid"
     slug_url_kwarg = "uid"
     title = 'UpdateView'
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.has_perm(self.model.perm(self.model, 'change')):
-            return super().dispatch(request, *args, **kwargs)
-        raise PermissionDenied()
 
     def get_template_names(self):
         app = str(self.model._meta.app_label).lower()
@@ -70,7 +69,7 @@ class UpdateView(UpdateView):
     def get_success_url(self):
         return self.object.get_absolute_url
 
-class DeleteView(DeleteView):
+class DeleteView(PermissionRequiredMixin, DeleteView):
     slug_field = "uid"
     slug_url_kwarg = "uid"
     title = 'DeleteView'
@@ -99,11 +98,6 @@ class EnableView(DeleteView):
     slug_url_kwarg = "uid"
     title = 'EnableView'
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.has_perm(self.model.perm(self.model, 'enable')):
-            return super().dispatch(request, *args, **kwargs)
-        raise PermissionDenied()
-
     def get_template_names(self):
         app = str(self.model._meta.app_label).lower()
         name = str(self.model.__name__).lower()
@@ -126,11 +120,6 @@ class DisableView(DeleteView):
     slug_url_kwarg = "uid"
     title = 'DisableView'
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.has_perm(self.model.perm(self.model, 'disable')):
-            return super().dispatch(request, *args, **kwargs)
-        raise PermissionDenied()
-
     def get_template_names(self):
         app = str(self.model._meta.app_label).lower()
         name = str(self.model.__name__).lower()
@@ -148,15 +137,10 @@ class DisableView(DeleteView):
         self.object.disable()
         return HttpResponseRedirect(success_url)
 
-class ListView(ListView):
+class ListView(PermissionRequiredMixin, ListView):
     template_name = None
     paginate_by = 100
     title = 'ListView'
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.has_perm(self.model.perm(self.model, 'view')):
-            return super().dispatch(request, *args, **kwargs)
-        raise PermissionDenied()
 
     def get_template_names(self):
         app = str(self.model._meta.app_label).lower()
@@ -169,15 +153,10 @@ class ListView(ListView):
         context.update({'opts': self.model._meta, 'view': 'list', 'title': self.title, 'guardian': guardian, 'can_askfor': self.model.config_askfor})
         return context
 
-class DetailView(DetailView):
+class DetailView(PermissionRequiredMixin, DetailView):
     slug_field = "uid"
     slug_url_kwarg = "uid"
     title = 'DetailView'
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.has_perm(self.model.perm(self.model, 'view')):
-            return super().dispatch(request, *args, **kwargs)
-        raise PermissionDenied()
 
     def get_template_names(self):
         app = str(self.model._meta.app_label).lower()
@@ -190,7 +169,7 @@ class DetailView(DetailView):
         context.update({'opts': self.model._meta, 'view': 'detail', 'title': self.title, 'guardian': guardian, 'can_askfor': self.model.config_askfor})
         return context
 
-class TemplateView(TemplateView):
+class TemplateView(PermissionRequiredMixin, TemplateView):
     title = 'TemplateView'
 
     def get_context_data(self, **kwargs):
@@ -219,50 +198,51 @@ class ViewSet:
 
     @classmethod
     def CreateView(self, *args, **kwargs):
-        cv = CreateView
-        cv.fields = self.fields
-        cv.model = self.model
-        return cv
+        view = CreateView
+        view.fields = self.fields
+        view.model = self.model
+        view.permission_required = (self.model().perm('add'),)
+        return view.as_view()
 
     @classmethod
     def UpdateView(self, *args, **kwargs):
-        uv = UpdateView
-        uv.fields = self.fields
-        uv.model = self.model
-        return uv
+        view = UpdateView
+        view.fields = self.fields
+        view.model = self.model
+        view.permission_required = (self.model().perm('change'),)
+        return view.as_view()
 
     @classmethod
     def DeleteView(self, *args, **kwargs):
-        dv = DeleteView
-        dv.model = self.model
-        return dv
+        view = DeleteView
+        view.model = self.model
+        view.permission_required = (self.model().perm('delete'),)
+        return view.as_view()
 
     @classmethod
     def EnableView(self, *args, **kwargs):
-        ev = EnableView
-        ev.model = self.model
-        return ev
+        view = EnableView
+        view.model = self.model
+        view.permission_required = (self.model().perm('enable'),)
+        return view.as_view()
 
     @classmethod
     def DisableView(self, *args, **kwargs):
-        dv = DisableView
-        dv.model = self.model
-        return dv
+        view = DisableView
+        view.model = self.model
+        view.permission_required = (self.model().perm('disable'),)
+        return view.as_view()
 
     @classmethod
     def ListView(self, *args, **kwargs):
-        lv = ListView
-        lv.model = self.model
-        return lv.as_view()
+        view = ListView
+        view.model = self.model
+        view.permission_required = (self.model().perm('list'),)
+        return view.as_view()
 
     @classmethod
     def DetailView(self, *args, **kwargs):
-        dv = DetailView
-        dv.model = self.model
-        return dv
-
-    @classmethod
-    def TemplateView(self, *args, **kwargs):
-        tv = TemplateView
-        tv.model = self.model
-        return tv
+        view = DetailView
+        view.model = self.model
+        view.permission_required = (self.model().perm('view'),)
+        return view.as_view()

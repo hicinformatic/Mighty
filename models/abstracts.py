@@ -10,6 +10,7 @@ from hashlib import sha256
 
 PERM_ADD = 'add'
 PERM_VIEW = 'view'
+PERM_LIST = 'list'
 PERM_CHANGE = 'change'
 PERM_DELETE = 'delete'
 PERM_ENABLE = 'enable'
@@ -28,7 +29,7 @@ class ModelBase(models.Model):
 
     @property
     def model_name(self):
-        str(self.__class__.__name__)
+        return str(self.__class__.__name__)
 
     class Meta:
         abstract = True
@@ -165,6 +166,7 @@ class ModelPermissions(models.Model):
     config_askfor = True
 
     def perm(self, perm):
+        print('%s.%s_%s' % (str(self.app_label).lower(), perm, str(self.model_name).lower()))
         return '%s.%s_%s' % (str(self.app_label).lower(), perm, str(self.model_name).lower())
 
     class Meta:
@@ -172,6 +174,7 @@ class ModelPermissions(models.Model):
         default_permissions = (
             PERM_ADD,
             PERM_VIEW,
+            PERM_LIST,
             PERM_CHANGE,
             PERM_DELETE,
             PERM_ENABLE,
