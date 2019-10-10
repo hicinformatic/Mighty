@@ -1,0 +1,6 @@
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" name="method" value="sms">
+    <input type="submit" name="method" value="email">
+</form>

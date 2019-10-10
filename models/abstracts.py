@@ -1,4 +1,6 @@
 from django.db import models
+from django.urls import reverse, NoReverseMatch
+from django.utils.html import format_html
 
 from mighty import fields, _
 from mighty.models import JSONField
@@ -9,7 +11,7 @@ from uuid import uuid4
 from hashlib import sha256
 
 PERM_ADD = 'add'
-PERM_VIEW = 'view'
+PERM_DETAIL = 'detail'
 PERM_LIST = 'list'
 PERM_CHANGE = 'change'
 PERM_DELETE = 'delete'
@@ -22,6 +24,19 @@ class ModelBase(models.Model):
     date_create = models.DateTimeField(_.f_date_create, auto_now_add=True, editable=False)
     date_update = models.DateTimeField(_.f_date_update, auto_now=True, editable=False)
     update_by = models.CharField(_.f_update_by, blank=True, editable=False, max_length=254, null=True)
+    title = {
+        'add': _.t_add,
+        'list': _.t_list,
+        'detail': _.t_detail,
+        'change': _.t_change,
+        'delete': _.t_delete,
+        'enable': _.t_enable,
+        'disable': _.t_disable, 
+    }
+
+    SHOW_DISPLAY_IN_URL = False
+    GENERATE_SIGNHASH = False
+    CAN_ASK_FOR_PERMISSIONS = False
 
     @property
     def app_label(self):
@@ -31,8 +46,72 @@ class ModelBase(models.Model):
     def model_name(self):
         return str(self.__class__.__name__)
 
+    def get_url(self, action, kwargs={}):
+        app = str(self._meta.app_label).lower()
+        name = str(self.__class__.__name__).lower()
+        try:
+            return reverse('%s:%s-%s' % (app, name, action), kwargs=kwargs)
+        except NoReverseMatch:
+            return '#'
+
+    @property
+    def add_url(self):
+        return self.get_url('add')
+
+    @property
+    def list_url(self):
+        return self.get_url('list')
+
+    @property
+    def detail_url(self):
+        kwargs = {'uid': str(self.uid)} if hasattr(self, 'uid') else {'pk': str(self.pk)}
+        if self.SHOW_DISPLAY_IN_URL: kwargs['display'] = quote_plus(self.display)
+        return self.get_url('detail', kwargs=kwargs)
+
+    @property
+    def change_url(self):
+        kwargs = {'uid': str(self.uid)} if hasattr(self, 'uid') else {'pk': str(self.pk)}
+        if self.SHOW_DISPLAY_IN_URL: kwargs['display'] = quote_plus(self.display)
+        return self.get_url('change', kwargs=kwargs)
+
+    @property
+    def delete_url(self):
+        kwargs = {'uid': str(self.uid)} if hasattr(self, 'uid') else {'pk': str(self.pk)}
+        if self.SHOW_DISPLAY_IN_URL: kwargs['display'] = quote_plus(self.display)
+        return self.get_url('delete', kwargs=kwargs)
+
+    def get_url_html(self, action, title=None):
+        return format_html('<a href="%s">%s</a>' % (getattr(self, '%s_url' % action), self.display if title is None else title))
+
+    @property
+    def add_url_html(self):
+        return self.get_url_html('add', self.title['add'])
+
+    @property
+    def list_url_html(self):
+        return self.get_url_html('list', self.title['list'])
+
+    @property
+    def detail_url_html(self):
+        return self.get_url_html('detail')
+
+    @property
+    def change_url_html(self):
+        return self.get_url_html('change', self.title['change'])
+
+    @property
+    def delete_url_html(self):
+        return self.get_url_html('delete', self.title['delete'])
+
     class Meta:
         abstract = True
+        default_permissions = (
+            PERM_ADD,
+            PERM_DETAIL,
+            PERM_LIST,
+            PERM_CHANGE,
+            PERM_DELETE,
+        )
 
 class ModelUid(models.Model):
     uid = models.UUIDField(unique=True, default=uuid4, editable=False)
@@ -52,7 +131,7 @@ class ModelImage(models.Model):
 
 class ModelDisplay(models.Model):
     display = models.CharField(_.f_display, blank=True, max_length=255, null=True)
-    config_urldisplay = True
+    SHOW_DISPLAY_IN_URL = True
 
     class Meta:
         abstract = True
@@ -81,7 +160,7 @@ class ModelToSearch(models.Model):
 
 class ModelSignHash(models.Model):
     signhash = models.CharField(_.f_signhash, db_index=True, blank=True, editable=False, max_length=254, null=True, unique=True)
-    config_signhash = True
+    GENERATE_SIGNHASH = True
 
     class Meta:
         abstract = True
@@ -94,7 +173,7 @@ class ModelSignHash(models.Model):
         return self._meta.get_fields()
 
     def get_signhash(self, *args, **kwargs):
-        if self.config_signhash:
+        if self.GENERATE_SIGNHASH:
             signhash = []
             for field in self.fields():
                 if field in fields.notsignhash:
@@ -129,6 +208,15 @@ class ModelDisable(models.Model):
 
     class Meta:
         abstract = True
+        default_permissions = (
+            PERM_ADD,
+            PERM_DETAIL,
+            PERM_LIST,
+            PERM_CHANGE,
+            PERM_DELETE,
+            PERM_ENABLE,
+            PERM_DISABLE,
+        )
 
     @property
     def is_enable(self):
@@ -142,6 +230,27 @@ class ModelDisable(models.Model):
         self.is_disable = False
         self.save()
 
+    @property
+    def enable_url(self):
+        kwargs = {'uid': str(self.uid)}
+        if self.SHOW_DISPLAY_IN_URL: kwargs['display'] = quote_plus(self.display)
+        return self.get_url('enable', kwargs=kwargs)
+    
+    @property
+    def disable_url(self):
+        kwargs = {'uid': str(self.uid)}
+        if self.SHOW_DISPLAY_IN_URL: kwargs['display'] = quote_plus(self.display)
+        return self.get_url('disable', kwargs=kwargs)
+
+
+    @property
+    def enable_url_html(self):
+        return self.get_url_html('enable', self.title['enable'])
+
+    @property
+    def disable_url_html(self):
+        return self.get_url_html('disable', self.title['disable'])
+
 class ModelAlert(models.Model):
     alerts = JSONField(_.f_alerts, blank=True, null=True)
 
@@ -151,6 +260,14 @@ class ModelAlert(models.Model):
     @property
     def is_in_alert(self):
         return True if alert is not None else False
+
+    @property
+    def title(self):
+        title = super().title
+        t_inalert = _('Est en alerte')
+        title.update({'in_alert': _.t_inalert})
+        return title
+
 
 class ModelError(models.Model):
     errors = JSONField(_.f_errors, blank=True, null=True)
@@ -162,18 +279,23 @@ class ModelError(models.Model):
     def is_in_error(self):
         return True if error is not None else False
 
+    @property
+    def title(self):
+        title = super().title
+        title.update({'in_error': _.t_inerror})
+        return title
+
 class ModelPermissions(models.Model):
-    config_askfor = True
+    CAN_ASK_FOR_PERMISSIONS = True
 
     def perm(self, perm):
-        print('%s.%s_%s' % (str(self.app_label).lower(), perm, str(self.model_name).lower()))
         return '%s.%s_%s' % (str(self.app_label).lower(), perm, str(self.model_name).lower())
 
     class Meta:
         abstract = True
         default_permissions = (
             PERM_ADD,
-            PERM_VIEW,
+            PERM_DETAIL,
             PERM_LIST,
             PERM_CHANGE,
             PERM_DELETE,

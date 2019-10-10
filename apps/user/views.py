@@ -1,5 +1,8 @@
-from mighty.views import ViewSet
-from mighty.models import User
+from mighty.views import ModelViewSet
+from mighty.models.user import Nationality, User
 
-class UserViewSet(ViewSet):
+class NationalityViewSet(ModelViewSet):
+    model = Nationality
+
+class UserViewSet(ModelViewSet):
     model = User

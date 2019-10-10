@@ -1,8 +1,9 @@
 {% load mighty %}
 
 {% with opts.app_label|add:":"|add:opts.model_name|add:"-create" as reverse %}
-<a href="{{ object_list.0.get_create_url }}">{{ title.create }}</a>
+<a href="{{ object_list.0.add_url }}">{{ title.create }}</a>
 {% endwith %}
+
 
 <table>
     <thead>
@@ -19,25 +20,33 @@
         {% for object in object_list %}
         <tr>
             <td>
-                <a href="{{ object.get_absolute_url }}">{{ object.display }}</a>
-            </td>
-            <td>
-                <a href="{{ object.get_update_url }}">{{ object.title.update }}</a>
-            </td>
-            <td>
-                {% if object.is_disable %}
-                <a href="{{ object.get_enable_url }}">{{ object.title.enable }}</a>
+                {% has_perm object request.user 'detail' as can_detail %}
+                {% if can_detail %}
+                    {{ object.detail_url_html }}
                 {% else %}
-                <a href="{{ object.get_disable_url }}">{{ object.title.disable }}</a>
+                    {{ object.display }}
                 {% endif %}
             </td>
-            {% if can_askfor %}
             <td>
-                {% if can_change %}
-                <a href="{{ object.get_urls.askfor_change_perm }}">Ask for change permission</a>
-                {% endif %}
+                {% has_perm object request.user 'change' as can_change %}
+                {% if can_change %}{{ object.change_url_html }}{% endif %}
             </td>
+            <td>
+            {% if object.is_disable %}
+                {% has_perm object request.user 'enable' as can_enable %}
+                {% if can_enable %}{{ object.enable_url_html }}{% endif %}
+            {% else %}
+                {% has_perm object request.user 'disable' as can_disable %}
+                {% if can_disable %}{{ object.disable_url_html }}{% endif %}
             {% endif %}
+            </td>
+            <td>
+                {% has_perm object request.user 'askfor' as can_askfor %}
+                {% if can_askfor %}
+                {% endif %}
+
+            </td>
+
         </tr>
         {% endfor %}
     </tbody>

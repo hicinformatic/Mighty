@@ -10,5 +10,4 @@ register = template.Library()
 
 @register.simple_tag
 def has_perm(obj, user, perm):
-    return True
     return ObjectPermissionChecker(user).has_perm(perm, obj) if guardian else user.has_perm(obj.perm(perm))

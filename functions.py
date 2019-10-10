@@ -7,37 +7,6 @@ BS = MightyConfig.Crypto.BS
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
 unpad = lambda s : s[:-ord(s[len(s)-1:])]
 
-
-from django.urls import include, path
-from django.utils.module_loading import import_string
-def generate_urls(model, views, useid=False, *args, **kwargs):
-    urlsp = []
-    views = import_string(views)
-    name = str(model.__name__.lower())
-    uid = '<pk:id>' if useid else '<uuid:uid>'
-
-    if 'views_permissions' in kwargs and kwargs['views_permissions']:
-        viewsp = import_string('mighty.apps.user.views.user.permissions')
-        urlsp = path('permission/', include([
-                path('change/', viewsp.AskForChangePermissionView.as_view(), name='%s-askfor-change-perm' % name),            
-         ]))
-
-    urlsa = [
-        path('update/', views.UpdateView.as_view(), name='%s-update' % name),
-        path('delete/', views.DeleteView.as_view(), name='%s-delete' % name),
-        path('disable/', views.DisableView.as_view(), name='%s-disable' % name),
-        path('enable/', views.EnableView.as_view(), name='%s-enable' % name),
-        path('permission/', include(urlsp)),
-    ]
-    if 'config_urldisplay' in kwargs and kwargs['config_urldisplay']:
-        urlsa = path('<str:display>/', include[urlsa])
-
-    return [
-        path('create/', views.CreateView.as_view(), name='%s-create' % name),
-        path('<uuid:uid>/', include(urlsa)),
-        path('', views.ListView.as_view(), name='%s-list' % name),
-    ]
-
 def test(input_str=None):
     return True if str(input_str).strip().lower().replace(' ', '') not in MightyConfig.Test.search else False
 
