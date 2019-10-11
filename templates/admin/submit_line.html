@@ -8,7 +8,7 @@
     {% has_perm original request.user "disable" as show_disable_link %}
     {% if show_enable_link and original.is_disable %}
         {% url opts|admin_urlname:'enable' original.pk|admin_urlquote as enable_url %}
-        <p class="deletelink-box"><a href="{% add_preserved_filters enable_url %}" class="deletelink enablelink">{% trans "Enable" %}</a></p>
+        <p class="deletelink-box"><a href="{% add_preserved_filters enable_url %}" class="deletelink enablelink">{{ titles.enable }}</a></p>
     {% endif %}
     {% if show_disable_link and original.is_enable %}
         {% url opts|admin_urlname:'disable' original.pk|admin_urlquote as disable_url %}

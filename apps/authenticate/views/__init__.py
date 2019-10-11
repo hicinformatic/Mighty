@@ -5,6 +5,7 @@ from mighty.models.authenticate import Email, Sms
 class EmailViewSet(ModelViewSet):
     slug = '<int:pk>'
     model = Email
+    list_display = ('email', 'status',)
 
     def __init__(self, model=None):
         super().__init__()
@@ -14,6 +15,7 @@ class EmailViewSet(ModelViewSet):
 class SmsViewSet(ModelViewSet):
     slug = '<int:pk>'
     model = Sms
+    list_display = ('phone', 'status',)
 
     def __init__(self, model=None):
         super().__init__()

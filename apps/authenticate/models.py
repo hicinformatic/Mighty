@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from mighty.models import JSONField
 from mighty.models.abstracts import ModelBase, ModelPermissions
 from mighty.apps.authenticate import _
+from mighty.apps.user import _ as _u
 
 UserModel = get_user_model()
 
@@ -43,6 +44,11 @@ class Email(Template):
         backend = self.get_backend()
         return backend.check_email(self)
 
+    def email(self):
+        return self.user.email
+    email.short_description = _u.f_email
+    email.admin_order_field = 'user__email'
+
 class Sms(Template):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='sms_sendto_user', editable=False)
     sms = models.TextField(_.f_sms, editable=False)
@@ -56,3 +62,8 @@ class Sms(Template):
     def check_status(self):
         backend = self.get_backend()
         return backend.check_sms(self)
+
+    def phone(self):
+        return self.user.phone
+    phone.short_description = _u.f_phone
+    phone.admin_order_field = 'user__phone'

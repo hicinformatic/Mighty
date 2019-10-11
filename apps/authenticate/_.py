@@ -25,6 +25,16 @@ e_cant_send = _("Impossible d'envoyer un message")
 tpl_subject = _("%s - Code de connexion")
 tpl_html = _("Voici votre code de vérification personnel pour vous connecter au site %s est %s")
 tpl_txt = _("Voici votre code de vérification personnel pour vous connecter au site %s est %s")
+tpl_email_code = _("Entrez le code reçu par Email")
+tpl_sms_code = _("Entrez le code reçu par SMS")
+
+send_method = _("Envoyer par")
+submit_code =_("Me connecter")
+
+method_email = _("Email")
+method_sms = _("SMS")
+
+t_authenticate = _("Authentication")
 
 v_sms = _('SMS')
 v_email = _('Email')

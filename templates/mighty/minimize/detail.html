@@ -1,3 +1,5 @@
+{% load mighty %}
+
 <table class="table table-striped">
     <thead class="thead-dark">
         <tr>
@@ -8,7 +10,8 @@
     <tbody>
     {% for field in fields %}
         <tr>
-            <td>field</td>
+            <td>{% field_name object field %}</td>
+            <td>{% field_value object field %}</td>
         </tr>
     {% endfor %}
     </tbody>

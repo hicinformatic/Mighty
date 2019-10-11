@@ -47,12 +47,28 @@ class ModelBase(models.Model):
         return str(self.__class__.__name__)
 
     def get_url(self, action, kwargs={}):
-        app = str(self._meta.app_label).lower()
-        name = str(self.__class__.__name__).lower()
         try:
-            return reverse('%s:%s-%s' % (app, name, action), kwargs=kwargs)
+            return reverse('%s:%s-%s' % (self.app_label.lower(), self.model_name.lower(), action), kwargs=kwargs)
         except NoReverseMatch:
             return '#'
+
+    def get_admin_url(self, action, args=()):
+        try:
+            return reverse('admin:%s_%s_%s' % (self.app_label.lower(), self.model_name.lower(), action), args=args)
+        except NoReverseMatch:
+            return '#'
+
+    @property
+    def admin_list_url(self):
+        return self.get_admin_url('changelist')
+
+    @property
+    def admin_add_url(self):
+        return self.get_admin_url('add')
+
+    @property
+    def admin_change_url(self):
+        return self.get_admin_url('change', args=(self.id,))
 
     @property
     def add_url(self):
@@ -81,7 +97,7 @@ class ModelBase(models.Model):
         return self.get_url('delete', kwargs=kwargs)
 
     def get_url_html(self, action, title=None):
-        return format_html('<a href="%s">%s</a>' % (getattr(self, '%s_url' % action), self.display if title is None else title))
+        return format_html('<a href="%s">%s</a>' % (getattr(self, '%s_url' % action), self.__str__() if title is None else title))
 
     @property
     def add_url_html(self):
@@ -232,13 +248,13 @@ class ModelDisable(models.Model):
 
     @property
     def enable_url(self):
-        kwargs = {'uid': str(self.uid)}
+        kwargs = {'uid': str(self.uid)} if hasattr(self, 'uid') else {'pk': str(self.pk)}
         if self.SHOW_DISPLAY_IN_URL: kwargs['display'] = quote_plus(self.display)
         return self.get_url('enable', kwargs=kwargs)
     
     @property
     def disable_url(self):
-        kwargs = {'uid': str(self.uid)}
+        kwargs = {'uid': str(self.uid)} if hasattr(self, 'uid') else {'pk': str(self.pk)}
         if self.SHOW_DISPLAY_IN_URL: kwargs['display'] = quote_plus(self.display)
         return self.get_url('disable', kwargs=kwargs)
 

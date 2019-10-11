@@ -1,4 +1,12 @@
-<form method="post">{% csrf_token %}
-    <p>Are you sure you want to disable "{{ object }}"?</p>
-    <input type="submit" value="Confirm">
-</form>
+{% extends "mighty/base.html" %}
+
+{% block content %}
+<section class="container">
+    <h1>{{ object }}</h1>
+    {% include "mighty/breadcrumb.html"%}
+
+    <div class="alert alert-warning" role="alert">
+    {% include "mighty/minimize/disable.html" %}
+    </div>
+</section>
+{% endblock %}

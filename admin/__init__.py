@@ -12,6 +12,9 @@ admin.sites.site = mysite
 if 'mighty.apps.extend' in settings.INSTALLED_APPS:
     from mighty.admin import extend
 
+if 'mighty.apps.nationality' in settings.INSTALLED_APPS:
+    from mighty.admin import nationality
+
 if 'mighty.apps.user' in settings.INSTALLED_APPS:
     from mighty.admin import user
 

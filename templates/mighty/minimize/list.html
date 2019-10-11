@@ -1,30 +1,59 @@
+{% load mighty %}
+
+{% if object_list %}
 <table class="table table-striped">
     <thead class="thead-dark">
         <tr>
-            <th scope="col">{{ meta.verbose_name }}</th>
-            {% if has_change_permission %}<th scope="col">{{ titles.change }}</th>{% endif %}
-            {% if has_enable_permission and has_disable_permission%}
-            <th scope="col">{{ titles.enable }}/{{ titles.disable }}</th>
+            {% for field in list_display %}
+            <th>
+            {% if forloop.first %}
+                {% if has_add_permission %}
+                <a class="btn btn-secondary btn-sm" href="{{ links.add }}" role="button"><i class="fas fa-plus">&nbsp;</i>{{ meta.verbose_name }}</a>
+                {% else %}
+                {% field_name object_list.0 field %}
+                {% endif %}
+            {% else %}
+                {% field_name object_list.0 field %}
             {% endif %}
-            {% if has_delete_permission %}<th scope="col">{{ titles.delete }}</th>{% endif %}
+            </th>
+            {% endfor %}
+            {% if has_change_permission %}<th class="text-center">{{ titles.change }}</th>{% endif %}
+            {% if has_enable_permission and has_disable_permission%}
+            <th class="text-center">{{ titles.enable }}/{{ titles.disable }}</th>
+            {% endif %}
+            {% if has_delete_permission %}<th class="text-center">{{ titles.delete }}</th>{% endif %}
         </tr>
     </thead>
     <tbody>
     {% for object in object_list %}
         <tr>
-            <td>{% if has_detail_permission %}{{ object.detail_url_html }}{% else %}{{ object.display }}{% endif %}</td>
-            {% if has_change_permission %}<td><a href="{{ object.change_url }}">{{ titles.change }}</a></td>{% endif %}
-            {% if has_enable_permission and has_disable_permission%}
+            {% for field in list_display %}
             <td>
-                {% if object.is_disable %}
-                <a href="{{ object.enable_url }}">{{ titles.enable }}</a>
+            {% if forloop.first %}
+                {% if has_detail_permission %}
+                <a href="{{ object.detail_url }}">{% field_value object field %}</a>
                 {% else %}
-                <a href="{{ object.disable_url }}">{{ titles.disable }}</a>
+                {% field_value object field %}
+                {% endif %}
+            {% else %}
+                {% field_value object field %}
+            {% endif %}
+            </td>
+            {% endfor %}
+
+            {% if has_change_permission %}<td class="text-center"><a class="btn btn-secondary btn-sm" href="{{ object.change_url }}">{{ titles.change }}</a></td>{% endif %}
+            {% if has_enable_permission and has_disable_permission%}
+            <td class="text-center">
+                {% if object.is_disable %}
+                <a class="btn btn-success btn-sm" href="{{ object.enable_url }}">{{ titles.enable }}</a>
+                {% else %}
+                <a class="btn btn-warning btn-sm" href="{{ object.disable_url }}">{{ titles.disable }}</a>
                 {% endif %}
             </td>
             {% endif %}
-            {% if has_delete_permission %}<td><a href="{{ object.delete_url }}">{{ titles.delete }}</td>{% endif %}
+            {% if has_delete_permission %}<td class="text-center"><a class="btn btn-danger btn-sm" href="{{ object.delete_url }}">{{ titles.delete }}</td>{% endif %}
         </tr>
     {% endfor %}
     </tbody>
 </table>
+{% endif %}

@@ -60,3 +60,8 @@ e_signhash = _("""La signature de l'objet ne peut être dupliqué, un objet simi
 e_unique_perm = _("Vous faites déjà l'objet d'une demande concernant cette permission")
 
 a_infos = _("Informations")
+
+tpl_disable  = _("Are you sure you want to disable")
+tpl_enable  = _("Are you sure you want to enable")
+tpl_delete  = _("Are you sure you want to delete")
+tpl_admin_view = _("Access to the administrator view")

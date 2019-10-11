@@ -3,26 +3,27 @@
 {% block content %}
 <section class="container">
     <h1>{{ object }}</h1>
+    {% include "mighty/breadcrumb.html"%}
 
     <div class="row justify-content-between">
-        <div class="col-8">
+        <div class="col-4">
             {% if has_list_permission %}
-            <a class="btn btn-dark mb-1" href="{{ links.list }}" role="button"><i class="fas fa-list">&nbsp;</i>{{ titles.list }}</a>
+            <a class="btn btn-secondary mb-1" href="{{ links.list }}" role="button"><i class="fas fa-list">&nbsp;</i>{{ titles.list }}</a>
             {% endif %}
             {% if has_change_permission %}
-            <a class="btn btn-dark mb-1" href="{{ links.change }}" role="button"><i class="fas fa-edit">&nbsp;</i>{{ titles.change }}</a>
+            <a class="btn btn-secondary mb-1" href="{{ links.change }}" role="button"><i class="fas fa-edit">&nbsp;</i>{{ titles.change }}</a>
             {% endif %}
             {% if has_enable_permission and has_disable_permission %}
             {% if object.is_disable %}
-            <a class="btn btn-dark mb-1" href="{{ object.enable_url }}"><i class="fas fa-toggle-off">&nbsp;</i>{{ titles.enable }}</a>
+            <a class="btn btn-success mb-1" href="{{ object.enable_url }}"><i class="fas fa-toggle-off">&nbsp;</i>{{ titles.enable }}</a>
             {% else %}
-            <a class="btn btn-dark mb-1" href="{{ object.disable_url }}"><i class="fas fa-toggle-on">&nbsp;</i>{{ titles.disable }}</a>
+            <a class="btn btn-warning mb-1" href="{{ object.disable_url }}"><i class="fas fa-toggle-on">&nbsp;</i>{{ titles.disable }}</a>
             {% endif %}
             {% endif %}
         </div>
         <div class="col-4 text-right">
             {% if has_delete_permission %}
-            <a class="btn btn-dark mb-1" href="{{ links.delete }}" role="button"><i class="fas fa-trash">&nbsp;</i>{{ titles.delete }}</a>
+            <a class="btn btn-danger mb-1" href="{{ links.delete }}" role="button"><i class="fas fa-trash">&nbsp;</i>{{ titles.delete }}</a>
             {% endif %}
         </div>
     </div>

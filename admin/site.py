@@ -49,7 +49,7 @@ class OverAdmin(admin.ModelAdmin):
     enable_confirmation_template = None
     list_display = fields.list_display
     list_filter = (InErrorListFilter, InAlertListFilter) + fields.list_filter
-    readonly_fields = fields.readonly_fields
+    readonly_fields = fields.full
     search_fields = fields.search_fields
     save_on_top = True
 

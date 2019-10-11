@@ -1,3 +1,19 @@
+base = ('id', 'date_create','date_update','update_by',)
+modeluid = ('uid',)
+image = ('image',)
+display = ('display',)
+tosearch = ('to_search',)
+signhash = ('signhash',)
+disable = ('is_disable',)
+alert = ('alerts',)
+error = ('errors',)
+full = base + modeluid + image + display + tosearch + signhash + disable + alert + error
+
+readonly_fields =  base + modeluid + tosearch + signhash + disable + alert + error
+list_display = display + disable
+list_filter = disable
+search_fields = display + tosearch
+
 notsignhash = (
     'id',
     'uid',
@@ -13,34 +29,3 @@ notsignhash = (
     'alerts',
     'errors',
 )
-
-notsignhash = (
-    'id',
-    'uid',
-    'to_search',
-    'is_disable',
-    'date_create',
-    'date_update',
-    'update_by',
-    'signhash',
-    'alerts',
-    'errors',
-    'related_data',
-)
-
-readonly_fields = (
-    'id',
-    'uid',
-    'to_search',
-    'is_disable',
-    'date_create',
-    'date_update',
-    'update_by',
-    'signhash',
-    'alerts',
-    'errors',
-)
-
-list_display = ('__str__', 'is_disable')
-list_filter = ('is_disable',)
-search_fields = ('display', 'signhash',)

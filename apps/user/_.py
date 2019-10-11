@@ -1,9 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
-f_country = _('Pays')
-f_alpha2 = _('Alpha2')
-f_alpha3 = _('alpha3')
-f_numeric = _('Numérique')
+f_email = _('Email')
 f_username = _('Identifiant')
 f_method = _('Méthode')
 f_mail = _('E-mail')
@@ -23,11 +20,10 @@ c_method_import = _('Import (csv/xls)')
 c_man = _('Homme')
 c_woman = _('Femme')
 
-v_nationality = _('Nationalité')
+
 v_group = _('Groupe')
 v_user = _('Utilisateur')
 
-vp_nationality = _('Nationalités')
 vp_group = _('Groupes')
 vp_user = _('Utilisateurs')
 
@@ -39,5 +35,3 @@ a_ip = _('IP')
 
 v_permission = _('Permission')
 vp_permission = _('Permissions')
-
-

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from mighty.apps import MightyConfig
+from mighty.fields import notsignhash
 from mighty.functions import test, boolean_input
 import os.path, csv, sys, logging, re
 
@@ -135,11 +135,12 @@ class AddModelFromCSV(BaseCommand):
     def check_datas(self, row):
         for field in self.fields_mandatory:
             if test(row[field]):
-                #self.error(field, 'Check datas: "%s"' % row[field])
-                return False
-        return True
+                return True
+        self.error(field, 'Check datas: "%s"' % row[field])
+        return False
 
     def do_line(self, line):
+        print('ok')
         for key in line:
             if line[key].lower() in self.line_overwrite:
                 line[key] = self.line_overwrite[line[key].lower()]
@@ -167,7 +168,7 @@ class AddModelFromCSV(BaseCommand):
     def sources(self):
         source = None
         for field in self.model._meta.fields:
-            if field.attname not in MightyConfig.Field.default:
+            if field.attname not in notsignhash:
                 fsource = self.getSource(field.attname)
                 if fsource:
                     try:
@@ -195,6 +196,8 @@ class AddModelFromCSV(BaseCommand):
                 if self.check_datas(row):
                     self.do_line(row)
                     self.alerts = {}
+                else:
+                    print('tata')
 
     def handle(self, *args, **options):
         self.startLog(options.get('verbosity'))

@@ -11,30 +11,6 @@ from mighty.apps.user.manager import UserManager
 
 import time
 
-class Nationality(ModelFull):
-    country = models.CharField(_.f_country, max_length=255)
-    alpha2 = models.CharField(_.f_alpha2, max_length=2)
-    alpha3 = models.CharField(_.f_alpha3, max_length=3, blank=True, null=True)
-    numeric = models.CharField(_.f_numeric, max_length=3, blank=True, null=True)
-    GENERATE_SIGNHASH = True
-
-    class Meta(ModelFull.Meta):
-        abstract = True
-        verbose_name = _.v_nationality
-        verbose_name_plural = _.vp_nationality
-        ordering = ['country', ]
-
-    def __str__(self):
-        return "%s (%s, %s, %s)" % (self.country, self.alpha2, self.alpha3, self.numeric)
-
-    @property
-    def image_url(self):
-        return static('flags/%s.png' % self.alpha2.lower())
-
-    @property
-    def html(self):
-        return format_html('<img src="%s" title="%s">' % (self.image_url, self.__str__()))
-
 METHOD_CREATESU = 'CREATESUPERUSER'
 METHOD_BACKEND = 'BACKEND'
 METHOD_FRONTEND = 'FRONTEND'

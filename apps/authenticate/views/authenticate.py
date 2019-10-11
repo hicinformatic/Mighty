@@ -1,10 +1,15 @@
 from django.contrib.auth.views import LoginView
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
+from mighty.functions import encrypt, decrypt
 from mighty.apps.authenticate.forms import UserSearchForm, AuthenticateTwoFactorForm
-from mighty.views import DetailView, AdminView, FormView
+from mighty.views import DetailView, AdminView, FormView, BaseView
 from mighty.models.authenticate import Email, Sms
+from mighty.apps.authenticate import _
+
+from urllib.parse import quote_plus, unquote_plus
 
 class CheckStatus(DetailView):
     template_name = 'authenticate/check.html'
@@ -25,10 +30,6 @@ class AdminEmailCheckStatus(CheckStatus, AdminView):
     model = Email
     permission_required = ('mighty:view_email', 'mighty:check_email')
 
-
-from mighty.functions import encrypt, decrypt
-from django.conf import settings
-from urllib.parse import quote_plus, unquote_plus
 UserModel = get_user_model()
 class Login(FormView):
     model = UserModel
@@ -43,12 +44,31 @@ class Login(FormView):
         self.method = form.method_cache
         return super(Login, self).form_valid(form)
 
+    def get_header(self):
+        return {
+            'title': _.t_authenticate
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "send_method": _.send_method,
+            "method_sms": _.method_sms,
+            "method_email": _.method_email,
+        })
+        return context
+
     def get_success_url(self):
         useruid = encrypt(settings.SECRET_KEY[:16], str(self.user.uid)).decode('utf-8')
         return reverse('mighty:%s-login' % self.method, kwargs={'uid': quote_plus(useruid)})
 
-class LoginView(LoginView):
+class LoginView(BaseView, LoginView):
     form_class = AuthenticateTwoFactorForm
+
+    def get_header(self):
+        return {
+            'title': _.t_authenticate
+        }
 
     def get_form_kwargs(self):
         kwargs = super(LoginView, self).get_form_kwargs()
@@ -56,8 +76,23 @@ class LoginView(LoginView):
         kwargs.update({'request' : self.request, 'uid': useruid})
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"submit": _.submit_code})
+        return context
+
 class LoginEmail(LoginView):
     template_name = 'authenticate/login/email.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"howto": _.tpl_email_code})
+        return context
+
 class LoginSms(LoginView):
     template_name = 'authenticate/login/sms.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"howto": _.tpl_sms_code})
+        return context

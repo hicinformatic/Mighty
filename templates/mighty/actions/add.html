@@ -1,4 +1,8 @@
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Update">
-</form>
+{% extends "mighty/base.html" %}
+{% block content %}
+<section class="container">
+    <h1>{{ header.title }}</h1>
+    {% include "mighty/breadcrumb.html"%}
+    {% include "mighty/minimize/add.html" %}
+</section>
+{% endblock %}

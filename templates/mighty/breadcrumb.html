@@ -1,0 +1,30 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        {% if has_list_permission %}
+            {% if view == 'list' %}
+            <li class="breadcrumb-item active">{{ meta.verbose_name_plural }}</li>
+            {% else %}
+            <li class="breadcrumb-item"><a href="{{ links.list }}">{{ meta.verbose_name_plural }}</a></li>
+            {% endif %}
+        {% endif %}
+        {% if has_object %}
+            {% if view == 'detail' %}
+            <li class="breadcrumb-item active">{{ object }}</li>
+            {% else %}
+            <li class="breadcrumb-item"><a href="{{ links.detail }}">{{ object }}</a></li>
+            {% endif %}
+        {% endif %}
+        {% if view == 'add' %}
+        <li class="breadcrumb-item active">{{ titles.add }}</li>
+        {% elif view == 'change' %}
+        <li class="breadcrumb-item active">{{ titles.change }}</li>
+        {% elif view == 'disable' %}
+        <li class="breadcrumb-item active">{{ titles.disable }}</li>
+        {% elif view == 'enable' %}
+        <li class="breadcrumb-item active">{{ titles.enable }}</li>
+        {% elif view == 'delete' %}
+        <li class="breadcrumb-item active">{{ titles.delete }}</li>
+        {% endif %}
+    </ol>
+</nav>

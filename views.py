@@ -23,6 +23,10 @@ class BaseView(PermissionRequiredMixin):
     slug_field = "uid"
     slug_url_kwarg = "uid"
     paginate_by = 100
+    permission_required = ()
+
+    def has_object(self):
+        return True if hasattr(self, 'object') and self.object is not None else False
 
     def get_options(self):
         return {
@@ -31,7 +35,7 @@ class BaseView(PermissionRequiredMixin):
 
     def get_header(self):
         return {
-            'title': '%s | %s' % (self.model._meta.verbose_name, self.__class__.__name__.title()),
+            'title': '%s | %s' % (self.model._meta.verbose_name, self.get_titles()[self.__class__.__name__])
         }
 
     def get_titles(self):
@@ -45,23 +49,30 @@ class BaseView(PermissionRequiredMixin):
             'disable': _.t_disable,
         }
 
-    def get_links(self):
-        hasobject = hasattr(self, 'object')
+    def get_urls(self):
+        hasobject = self.has_object()
         model = self.object if hasobject else self.model()
-        links = { 'add': model.add_url, 'list': model.list_url, }
+        urls = {
+            'add': model.add_url,
+            'list': model.list_url,
+            'admin': {
+                'add': model.admin_add_url,
+                'list': model.admin_list_url,
+                'change': model.admin_change_url,
+            }
+        }
         if hasobject:
-            links.update({
+            urls.update({
                 'detail': model.detail_url,
                 'change': model.change_url,
                 'delete': model.delete_url,
                 'enable': model.enable_url,
                 'disable': model.disable_url,
             })
-        return links
+        return urls
 
     def get_permissions(self):
-        hasobject = hasattr(self, 'object')
-        model = self.object if hasobject else self.model()
+        model = self.object if self.has_object() else self.model()
         return {
             'has_add_permission': self.request.user.has_perm(model.perm('add')),
             'has_list_permission': self.request.user.has_perm(model.perm('list')),
@@ -77,6 +88,14 @@ class BaseView(PermissionRequiredMixin):
         name = str(self.model.__name__).lower()
         return self.template_name or tpl(app, name, self.__class__.__name__)
 
+    def get_questions(self):
+        return {
+            "disable": _.tpl_disable,
+            "enable": _.tpl_enable,
+            "delete": _.tpl_delete,
+            'admin_view':  _.tpl_admin_view,
+        }
+
     def get_context_data(self, **kwargs):
         context = super(BaseView, self).get_context_data(**kwargs)
         logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
@@ -85,9 +104,16 @@ class BaseView(PermissionRequiredMixin):
             'header': self.get_header(),
             'titles': self.get_titles(),
             'options': self.get_options(),
-            'links': self.get_links(),
+            'links': self.get_urls(),
+            'has_object': self.has_object(),
+            'questions': self.get_questions(),
+            'view': self.__class__.__name__,
         })
         context.update(self.get_permissions())
+        if hasattr(self, 'list_display'):
+            context.update({'list_display': self.list_display})
+        if hasattr(self, 'fields'):
+            context.update({'fields': self.fields})
         return context
 
 class FormView(BaseView, FormView):
@@ -96,14 +122,21 @@ class FormView(BaseView, FormView):
 class AddView(BaseView, CreateView):
     pass
 
-class ListView(BaseView, ListView):
-    pass
-
 class DetailView(BaseView, DetailView):
     pass
 
 class TemplateView(BaseView, TemplateView):
-    pass
+    pass    
+
+class ListView(BaseView, ListView):
+    filter_model = None
+
+    def get_queryset(self):
+        if self.filter_model is None:
+            return super().get_queryset()
+        else:
+            queryset, q = self.filter_model(self.request)
+        return queryset.filter(q)
 
 class ChangeView(BaseView, UpdateView):
     def get_success_url(self):
@@ -114,19 +147,21 @@ class DeleteView(BaseView, DeleteView):
         return self.object.list_url
 
 class EnableView(DeleteView):
+    def get_success_url(self):
+        return self.object.detail_url
+
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         success_url = self.get_success_url()
         self.object.enable()
         return HttpResponseRedirect(success_url)
 
-class DisableView(DeleteView):
+class DisableView(EnableView):
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         success_url = self.get_success_url()
         self.object.disable()
         return HttpResponseRedirect(success_url)
-
 
 class AdminView(object):
     def get_context_data(self, **kwargs):
@@ -146,6 +181,13 @@ class ViewSet(object):
     views = {}
     excluded_views = ()
     notuseid = []
+    filter_model = None
+    fields = ()
+    list_display = ('__str__',)
+    add_fields = None
+    change_fields = None
+    detail_fields = None
+    form_fields = None
 
     def __init__(self):
         self.views = deepcopy(self.views)
@@ -161,6 +203,17 @@ class ViewSet(object):
         View.permission_required = (self.model().perm(view),)
         View.model = self.model
         View.fields = self.fields
+        if view == 'list':
+            View.list_display = self.list_display
+            if self.filter_model is not None:
+                View.filter_model = self.filter_model
+        if view == 'add':
+            View.fields = self.fields if self.add_fields is None else self.add_fields
+        if view == 'change':
+            View.fields = self.fields if self.change_fields is None else self.change_fields
+        if view == 'detail':
+            View.fields = self.fields if self.detail_fields is None else self.detail_fields
+
         return View
 
     def name(self, view):

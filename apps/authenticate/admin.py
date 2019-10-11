@@ -9,7 +9,7 @@ class SmsAdmin(OverAdmin):
     fieldsets = (((None, {'fields': ('user', 'status', 'backend', 'response', 'sms')})),)
     list_filter = ('status',)
     readonly_fields = ('user', 'status', 'backend', 'response', 'sms')
-    list_display = ('user', 'status')
+    list_display = ('user', 'status',)
 
     def has_add_permission(self, request, obj=None):
         return False
