@@ -6,7 +6,7 @@ import os
 class Config:
     class Field:
         username = 'email'
-        required = ('username',)
+        required = ('username', 'phone')
 
 class UserConfig(AppConfig, Config):
     name = 'mighty.app.user'

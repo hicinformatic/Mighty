@@ -6,3 +6,4 @@ class NationalityViewSet(ModelViewSet):
 
 class UserViewSet(ModelViewSet):
     model = User
+    fields = ('email', 'phone', 'gender',)

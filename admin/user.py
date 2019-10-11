@@ -25,7 +25,7 @@ if 'mighty.apps.extend' in settings.INSTALLED_APPS:
 
 @admin.register(Permission)
 class PermissionAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('content_type',)
 
 @admin.register(models.Nationality)
 class NationalityAdmin(NationalityAdmin):

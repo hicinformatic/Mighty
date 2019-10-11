@@ -13,4 +13,4 @@ class UserCreationForm(UserCreationForm):
             try:
                 self.fields[field] = getattr(forms, "%sField" % field.title())(required=True)
             except AttributeError:
-                self.fields[field] = getattr(self, "%sField" % field.title())(required=True)
+                self.fields[field] = forms.CharField(required=True)

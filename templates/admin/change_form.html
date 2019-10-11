@@ -3,6 +3,10 @@
 {% block extrastyle %}
 {{ block.super }}
 <style>
+div.breadcrumbs{
+    position: sticky;
+    top: 0;
+}
 .disablelink {
     margin: 0 0 0 8px;
     background: coral!important;
@@ -13,7 +17,7 @@
 }
 .submit-row {
     position: sticky;
-    top: 0;
+    top: 40px;
 }
 </style>
 {% endblock %}

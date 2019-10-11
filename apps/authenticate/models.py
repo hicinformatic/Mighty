@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from mighty.models import JSONField
 from mighty.models.abstracts import ModelBase, ModelPermissions
-from mighty.apps.authenticate import translations as _
+from mighty.apps.authenticate import _
 
 UserModel = get_user_model()
 
@@ -37,6 +37,7 @@ class Email(Template):
         abstract = True
         verbose_name = _.v_email
         verbose_name_plural = _.vp_email
+        permissions = [('check_email', 'Can check Email'),]
 
     def check_status(self):
         backend = self.get_backend()
@@ -50,6 +51,7 @@ class Sms(Template):
         abstract = True
         verbose_name = _.v_sms
         verbose_name_plural = _.vp_sms
+        permissions = [('check_sms', 'Can check SMS'),]
 
     def check_status(self):
         backend = self.get_backend()

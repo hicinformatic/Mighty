@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model, authenticate
 from django.db.models import Q
 
-from mighty.apps.authenticate import send_sms, send_email, translations as _
+from mighty.apps.authenticate import send_sms, send_email, _
 UserModel = get_user_model()
 
 class UserSearchForm(forms.Form):

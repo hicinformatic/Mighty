@@ -1,114 +1,119 @@
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpResponseRedirect
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
-from django.contrib.auth.decorators import user_passes_test
+from django.urls import path, include
 
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from copy import deepcopy
 
 
 from mighty.functions import logger
+from mighty import _
 
 guardian = True if 'guardian' in settings.INSTALLED_APPS else False
-tpl = lambda a, n, t: ['%s/%s_%s.html' % (a, n, t), '%s/%s.html' % (a, t), '%s.html' % t, 'mighty/%s.html' % t]
+tpl = lambda a, n, t: ['%s/%s_%s.html' % (a, n, t), '%s/%s.html' % (a, t), '%s.html' % t, 'mighty/%s.html' % t, 'mighty/actions/%s.html' % t]
 
-class FormView(PermissionRequiredMixin, FormView):
-    title = 'FormView'
-
-    def get_template_names(self):
-        app = str(self.model._meta.app_label).lower()
-        name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, 'form')
-
-    def get_context_data(self, **kwargs):
-        logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(FormView, self).get_context_data(**kwargs)
-        context.update({'view': 'form', 'title': self.title})
-        return context
-
-class AddView(PermissionRequiredMixin, CreateView):
-    title = 'AddView'
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.has_perm(self.model.perm(self.model, 'add')):
-            return super().dispatch(request, *args, **kwargs)
-        raise PermissionDenied()
-
-    def get_template_names(self):
-        app = str(self.model._meta.app_label).lower()
-        name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, 'create')
-
-    def get_context_data(self, **kwargs):
-        logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(AddView, self).get_context_data(**kwargs)
-        context.update({'opts': self.model._meta, 'view': 'create', 'title': self.title})
-        return context
-
-class ChangeView(PermissionRequiredMixin, UpdateView):
+class BaseView(PermissionRequiredMixin):
+    template_name = None
     slug_field = "uid"
     slug_url_kwarg = "uid"
-    title = 'ChangeView'
+    paginate_by = 100
+
+    def get_options(self):
+        return {
+            'guardian': guardian,
+        }
+
+    def get_header(self):
+        return {
+            'title': '%s | %s' % (self.model._meta.verbose_name, self.__class__.__name__.title()),
+        }
+
+    def get_titles(self):
+        return {
+            'add': _.t_add,
+            'detail': _.t_detail,
+            'list': _.t_list,
+            'change': _.t_change,
+            'delete': _.t_delete,
+            'enable': _.t_enable,
+            'disable': _.t_disable,
+        }
+
+    def get_links(self):
+        hasobject = hasattr(self, 'object')
+        model = self.object if hasobject else self.model()
+        links = { 'add': model.add_url, 'list': model.list_url, }
+        if hasobject:
+            links.update({
+                'detail': model.detail_url,
+                'change': model.change_url,
+                'delete': model.delete_url,
+                'enable': model.enable_url,
+                'disable': model.disable_url,
+            })
+        return links
+
+    def get_permissions(self):
+        hasobject = hasattr(self, 'object')
+        model = self.object if hasobject else self.model()
+        return {
+            'has_add_permission': self.request.user.has_perm(model.perm('add')),
+            'has_list_permission': self.request.user.has_perm(model.perm('list')),
+            'has_detail_permission': self.request.user.has_perm(model.perm('detail')),
+            'has_change_permission': self.request.user.has_perm(model.perm('change')),
+            'has_delete_permission': self.request.user.has_perm(model.perm('delete')),
+            'has_enable_permission': self.request.user.has_perm(model.perm('enable')),
+            'has_disable_permission': self.request.user.has_perm(model.perm('disable')),
+        }
 
     def get_template_names(self):
         app = str(self.model._meta.app_label).lower()
         name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, 'change')
+        return self.template_name or tpl(app, name, self.__class__.__name__)
 
     def get_context_data(self, **kwargs):
+        context = super(BaseView, self).get_context_data(**kwargs)
         logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(ChangeView, self).get_context_data(**kwargs)
-        context.update({'opts': self.model._meta, 'view': 'change', 'title': self.title})
+        context.update({
+            'meta': self.model._meta,
+            'header': self.get_header(),
+            'titles': self.get_titles(),
+            'options': self.get_options(),
+            'links': self.get_links(),
+        })
+        context.update(self.get_permissions())
         return context
 
+class FormView(BaseView, FormView):
+    pass
+
+class AddView(BaseView, CreateView):
+    pass
+
+class ListView(BaseView, ListView):
+    pass
+
+class DetailView(BaseView, DetailView):
+    pass
+
+class TemplateView(BaseView, TemplateView):
+    pass
+
+class ChangeView(BaseView, UpdateView):
     def get_success_url(self):
         return self.object.detail_url
 
-class DeleteView(PermissionRequiredMixin, DeleteView):
-    slug_field = "uid"
-    slug_url_kwarg = "uid"
-    title = 'DeleteView'
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.has_perm(self.model.perm(self.model, 'delete')):
-            return super().dispatch(request, *args, **kwargs)
-        raise PermissionDenied()
-
-    def get_template_names(self):
-        app = str(self.model._meta.app_label).lower()
-        name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, 'delete')
-
-    def get_context_data(self, **kwargs):
-        logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(DeleteView, self).get_context_data(**kwargs)
-        context.update({'opts': self.model._meta, 'view': 'delete', 'title': self.title})
-        return context
-
+class DeleteView(BaseView, DeleteView):
     def get_success_url(self):
         return self.object.list_url
 
 class EnableView(DeleteView):
-    slug_field = "uid"
-    slug_url_kwarg = "uid"
-    title = 'EnableView'
-
-    def get_template_names(self):
-        app = str(self.model._meta.app_label).lower()
-        name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, 'enable')
-
-    def get_context_data(self, **kwargs):
-        logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(EnableView, self).get_context_data(**kwargs)
-        context.update({'opts': self.model._meta, 'view': 'enable', 'title': self.title})
-        return context
-
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         success_url = self.get_success_url()
@@ -116,67 +121,12 @@ class EnableView(DeleteView):
         return HttpResponseRedirect(success_url)
 
 class DisableView(DeleteView):
-    slug_field = "uid"
-    slug_url_kwarg = "uid"
-    title = 'DisableView'
-
-    def get_template_names(self):
-        app = str(self.model._meta.app_label).lower()
-        name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, 'disable')
-
-    def get_context_data(self, **kwargs):
-        logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(DisableView, self).get_context_data(**kwargs)
-        context.update({'opts': self.model._meta, 'view': 'disable', 'title': self.title})
-        return context
-
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         success_url = self.get_success_url()
         self.object.disable()
         return HttpResponseRedirect(success_url)
 
-class ListView(PermissionRequiredMixin, ListView):
-    template_name = None
-    paginate_by = 100
-    title = 'ListView'
-
-    def get_template_names(self):
-        app = str(self.model._meta.app_label).lower()
-        name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, 'list')
-
-    def get_context_data(self, **kwargs):
-        logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(ListView, self).get_context_data(**kwargs)
-        context.update({'opts': self.model._meta, 'view': 'list', 'title': self.title, 'guardian': guardian, 'can_askfor': self.model.CAN_ASK_FOR_PERMISSIONS})
-        return context
-
-class DetailView(PermissionRequiredMixin, DetailView):
-    slug_field = "uid"
-    slug_url_kwarg = "uid"
-    title = 'DetailView'
-
-    def get_template_names(self):
-        app = str(self.model._meta.app_label).lower()
-        name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, 'detail')
-
-    def get_context_data(self, **kwargs):
-        logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(DetailView, self).get_context_data(**kwargs)
-        context.update({'opts': self.model._meta, 'view': 'detail', 'title': self.title, 'guardian': guardian, 'can_askfor': self.model.CAN_ASK_FOR_PERMISSIONS})
-        return context
-
-class TemplateView(PermissionRequiredMixin, TemplateView):
-    title = 'TemplateView'
-
-    def get_context_data(self, **kwargs):
-        logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
-        context = super(TemplateView, self).get_context_data(**kwargs)
-        context.update({'title': self.title, 'title': self.title, 'guardian': guardian})
-        return context
 
 class AdminView(object):
     def get_context_data(self, **kwargs):
@@ -192,11 +142,10 @@ class AdminView(object):
         context.update(admin.site.each_context(self.request))
         return context
 
-from copy import deepcopy
-from django.urls import path, include
 class ViewSet(object):
     views = {}
     excluded_views = ()
+    notuseid = []
 
     def __init__(self):
         self.views = deepcopy(self.views)
@@ -204,9 +153,7 @@ class ViewSet(object):
             del self.views[k]
   
     def view(self, view, *args, **kwargs):
-        View = self.views[view]['view']
-        class View(View):
-            pass
+        View = type(view, (self.views[view]['view'],), {})
 
         for k, v in kwargs.items():
             setattr(View, k, v)
@@ -226,6 +173,12 @@ class ViewSet(object):
             if self.model.SHOW_DISPLAY_IN_URL:
                 url = '%s%s/' % (url, '<str:display>')
         return url
+
+    def addView(self, name, view, url):
+        self.views[name] = { 'view': view, 'url': url }
+
+    def addNotuseid(self, view):
+        self.notuseid.append(view)
 
     @property
     def urls(self):

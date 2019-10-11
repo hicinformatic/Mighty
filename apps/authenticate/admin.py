@@ -2,7 +2,7 @@ from django.urls import include, path
 
 from mighty import fields
 from mighty.admin.site import fset_default, fset_infos, OverAdmin, InErrorListFilter, InAlertListFilter
-from mighty.apps.authenticate.views.authenticate import AdminCheckStatus
+from mighty.apps.authenticate.views.authenticate import AdminEmailCheckStatus, AdminSmsCheckStatus
 from mighty.apps.authenticate import models
 
 class SmsAdmin(OverAdmin):
@@ -18,7 +18,7 @@ class SmsAdmin(OverAdmin):
         urlpatterns = super(SmsAdmin, self).get_urls()
         urlpatternsmore = []
         urlpatternsmore.append(
-            path('<int:pk>/change/check/', self.admin_site.admin_view(AdminCheckStatus.as_view()), name='admin-authenticate-check-sms')
+            path('<int:pk>/change/check/', self.admin_site.admin_view(AdminSmsCheckStatus.as_view()), name='admin-authenticate-check-sms')
         )
         urlpatterns = urlpatternsmore + urlpatterns
         return urlpatterns
@@ -36,7 +36,7 @@ class EmailAdmin(OverAdmin):
         urlpatterns = super(EmailAdmin, self).get_urls()
         urlpatternsmore = []
         urlpatternsmore.append(
-            path('<int:pk>/change/check/', self.admin_site.admin_view(AdminCheckStatus.as_view()), name='admin-authenticate-check-email')
+            path('<int:pk>/change/check/', self.admin_site.admin_view(AdminEmailCheckStatus.as_view()), name='admin-authenticate-check-email')
         )
         urlpatterns = urlpatternsmore + urlpatterns
         return urlpatterns

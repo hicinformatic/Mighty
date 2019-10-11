@@ -242,7 +242,6 @@ class ModelDisable(models.Model):
         if self.SHOW_DISPLAY_IN_URL: kwargs['display'] = quote_plus(self.display)
         return self.get_url('disable', kwargs=kwargs)
 
-
     @property
     def enable_url_html(self):
         return self.get_url_html('enable', self.title['enable'])
