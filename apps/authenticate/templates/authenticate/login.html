@@ -23,13 +23,23 @@
         <hr>        
         <div class="text-center">
             <small class="d-block"><b>{{ send_method }}</b></small>
-
+            {% if enable_sms %}
             <button class="btn btn-secondary btn-lg mt-3" type="submit" name="method" value="sms">
                 <i class="fas fa-mobile-alt">&nbsp;</i>{{ method_sms }}
             </button>
+            {% endif %}
+            {% if enable_sms %}
             <button class="btn btn-secondary btn-lg mt-3" type="submit" name="method" value="email">
                 <i class="fas fa-at">&nbsp;</i>{{ method_email }}
             </button>
+            {% endif %}
+            {% if enable_basic %}
+            <hr>
+            <small class="d-block"><b>{{ send_basic }}</b></small>
+            <button class="btn btn-secondary btn-lg mt-3" type="submit" name="method" value="basic">
+                <i class="fas fa-keyboard">&nbsp;</i>{{ method_basic }}
+            </button>
+            {% endif %}
         </div>
     </form>
 </section>

@@ -8,6 +8,7 @@ from mighty.apps.authenticate.forms import UserSearchForm, AuthenticateTwoFactor
 from mighty.views import DetailView, AdminView, FormView, BaseView
 from mighty.models.authenticate import Email, Sms
 from mighty.apps.authenticate import _
+from mighty.apps.authenticate.apps import AuthenticateConfig
 
 from urllib.parse import quote_plus, unquote_plus
 
@@ -52,9 +53,15 @@ class Login(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
+            "enable_email": AuthenticateConfig.method.email,
+            "enable_sms": AuthenticateConfig.method.sms,
+            "enable_basic": AuthenticateConfig.method.basic,
             "send_method": _.send_method,
+            "send_basic": _.send_basic,
             "method_sms": _.method_sms,
             "method_email": _.method_email,
+            "method_basic": _.method_basic,
+
         })
         return context
 
@@ -90,6 +97,14 @@ class LoginEmail(LoginView):
         return context
 
 class LoginSms(LoginView):
+    template_name = 'authenticate/login/sms.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"howto": _.tpl_sms_code})
+        return context
+
+class LoginBasic(LoginView):
     template_name = 'authenticate/login/sms.html'
 
     def get_context_data(self, **kwargs):

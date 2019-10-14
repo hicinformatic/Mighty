@@ -18,6 +18,7 @@ s_sms = _("Recevoir un code par SMS")
 s_email = _("Recevoir un code par Email")
 
 e_invalid_search = _("Please enter a correct Email, Phone or Username. Note that both fields may be case-sensitive.")
+e_invalid_method = _("Method invalid")
 e_invalid_login = _("Please enter a correct %(username)s and password. Note that both fields may be case-sensitive.")
 e_inactive = _("This account is inactive.")
 e_cant_send = _("Impossible d'envoyer un message")
@@ -28,11 +29,13 @@ tpl_txt = _("Voici votre code de vérification personnel pour vous connecter au 
 tpl_email_code = _("Entrez le code reçu par Email")
 tpl_sms_code = _("Entrez le code reçu par SMS")
 
-send_method = _("Envoyer par")
+send_method = _("Authentification par")
+send_basic = _("Authentification par mot de passe")
 submit_code =_("Me connecter")
 
 method_email = _("Email")
 method_sms = _("SMS")
+method_basic = _("Mot de passe")
 
 t_authenticate = _("Authentication")
 

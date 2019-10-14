@@ -100,7 +100,6 @@ class BaseView(PermissionRequiredMixin):
         context = super(BaseView, self).get_context_data(**kwargs)
         logger("mighty", "info", "view: %s" % self.__class__.__name__, self.request.user)
         context.update({
-            'meta': self.model._meta,
             'header': self.get_header(),
             'titles': self.get_titles(),
             'options': self.get_options(),
@@ -110,6 +109,8 @@ class BaseView(PermissionRequiredMixin):
             'view': self.__class__.__name__,
         })
         context.update(self.get_permissions())
+        if hasattr(self, "model"):
+            context.update({'meta': self.model._meta})
         if hasattr(self, 'list_display'):
             context.update({'list_display': self.list_display})
         if hasattr(self, 'fields'):

@@ -13,8 +13,10 @@ class UserSearchForm(forms.Form):
     method = forms.CharField(widget=forms.HiddenInput)
     user_cache = None
     method_cache = None
+    success_url = None
     error_messages = {
         'invalid_search': _.e_invalid_search,
+        'invalid_method': _.e_invalid_method,
         'inactive': _.e_inactive,
         'cant_send': _.e_cant_send,
     }
@@ -35,6 +37,18 @@ class UserSearchForm(forms.Form):
                 raise forms.ValidationError(self.error_messages['cant_send'], code='cant_send',)    
         except UserModel.DoesNotExist:
             raise forms.ValidationError(self.error_messages['invalid_search'], code='invalid_search',)
+
+
+        from django.urls import reverse, NoReverseMatch
+        from mighty.functions import encrypt, decrypt
+        from urllib.parse import quote_plus, unquote_plus
+        method = self.cleaned_data.get("method")
+        try:
+            useruid = encrypt(settings.SECRET_KEY[:16], str(self.user_cache.uid)).decode('utf-8')
+            self.success_url = reverse('mighty:%s-login' % method, kwargs={'uid': quote_plus(useruid)})
+        except NoReverseMatch:
+            raise forms.ValidationError(self.error_messages['invalid_method'], code='invalid_method',)
+        
         return self.cleaned_data
 
     def confirm_login_allowed(self, user):
@@ -49,6 +63,7 @@ class AuthenticateTwoFactorForm(AuthenticationForm):
 
     def clean(self):
         password = self.cleaned_data.get('password')
+
         if password:
             self.user_cache = authenticate(self.request, username=self.uid, password=password)
             if self.user_cache is None:
@@ -59,4 +74,6 @@ class AuthenticateTwoFactorForm(AuthenticationForm):
                 )
             else:
                 self.confirm_login_allowed(self.user_cache)
+        
+        
         return self.cleaned_data
