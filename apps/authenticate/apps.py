@@ -4,6 +4,9 @@ from django.conf import settings
 import os
 
 class Config:
+    methods = ['email', 'sms', 'basic']
+    methods_ws = ['email', 'sms']
+
     class method:
         email = True
         sms = True

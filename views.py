@@ -28,6 +28,9 @@ class BaseView(PermissionRequiredMixin):
     def has_object(self):
         return True if hasattr(self, 'object') and self.object is not None else False
 
+    def has_model(self):
+        return True if hasattr(self, 'model') and self.model is not None else False
+
     def get_options(self):
         return {
             'guardian': guardian,
@@ -50,43 +53,49 @@ class BaseView(PermissionRequiredMixin):
         }
 
     def get_urls(self):
-        hasobject = self.has_object()
-        model = self.object if hasobject else self.model()
-        urls = {
-            'add': model.add_url,
-            'list': model.list_url,
-            'admin': {
-                'add': model.admin_add_url,
-                'list': model.admin_list_url,
-                'change': model.admin_change_url,
+        urls = {}
+        if self.has_model():
+            hasobject = self.has_object()
+            model = self.object if hasobject else self.model()
+            urls = {
+                'add': model.add_url,
+                'list': model.list_url,
+                'admin': {
+                    'add': model.admin_add_url,
+                    'list': model.admin_list_url,
+                    'change': model.admin_change_url,
+                }
             }
-        }
-        if hasobject:
-            urls.update({
-                'detail': model.detail_url,
-                'change': model.change_url,
-                'delete': model.delete_url,
-                'enable': model.enable_url,
-                'disable': model.disable_url,
-            })
+            if hasobject:
+                urls.update({
+                    'detail': model.detail_url,
+                    'change': model.change_url,
+                    'delete': model.delete_url,
+                    'enable': model.enable_url,
+                    'disable': model.disable_url,
+                })
         return urls
 
     def get_permissions(self):
-        model = self.object if self.has_object() else self.model()
-        return {
-            'has_add_permission': self.request.user.has_perm(model.perm('add')),
-            'has_list_permission': self.request.user.has_perm(model.perm('list')),
-            'has_detail_permission': self.request.user.has_perm(model.perm('detail')),
-            'has_change_permission': self.request.user.has_perm(model.perm('change')),
-            'has_delete_permission': self.request.user.has_perm(model.perm('delete')),
-            'has_enable_permission': self.request.user.has_perm(model.perm('enable')),
-            'has_disable_permission': self.request.user.has_perm(model.perm('disable')),
-        }
+        if self.has_model():
+            model = self.object if self.has_object() else self.model()
+            return {
+                'has_add_permission': self.request.user.has_perm(model.perm('add')),
+                'has_list_permission': self.request.user.has_perm(model.perm('list')),
+                'has_detail_permission': self.request.user.has_perm(model.perm('detail')),
+                'has_change_permission': self.request.user.has_perm(model.perm('change')),
+                'has_delete_permission': self.request.user.has_perm(model.perm('delete')),
+                'has_enable_permission': self.request.user.has_perm(model.perm('enable')),
+                'has_disable_permission': self.request.user.has_perm(model.perm('disable')),
+            }
+        return {}
 
     def get_template_names(self):
-        app = str(self.model._meta.app_label).lower()
-        name = str(self.model.__name__).lower()
-        return self.template_name or tpl(app, name, self.__class__.__name__)
+        if self.has_model():
+            app = str(self.model._meta.app_label).lower()
+            name = str(self.model.__name__).lower()
+            return self.template_name or tpl(app, name, self.__class__.__name__)
+        return self.template_name
 
     def get_questions(self):
         return {

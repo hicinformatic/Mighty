@@ -43,6 +43,7 @@ class Login(FormView):
     def form_valid(self, form):
         self.user = form.user_cache
         self.method = form.method_cache
+        self.success_url = form.success_url
         return super(Login, self).form_valid(form)
 
     def get_header(self):
@@ -66,8 +67,7 @@ class Login(FormView):
         return context
 
     def get_success_url(self):
-        useruid = encrypt(settings.SECRET_KEY[:16], str(self.user.uid)).decode('utf-8')
-        return reverse('mighty:%s-login' % self.method, kwargs={'uid': quote_plus(useruid)})
+        return self.success_url
 
 class LoginView(BaseView, LoginView):
     form_class = AuthenticateTwoFactorForm
@@ -79,8 +79,8 @@ class LoginView(BaseView, LoginView):
 
     def get_form_kwargs(self):
         kwargs = super(LoginView, self).get_form_kwargs()
-        useruid = decrypt(settings.SECRET_KEY[:16], unquote_plus(self.kwargs.get('uid'))).decode("utf-8")
-        kwargs.update({'request' : self.request, 'uid': useruid})
+        useruidandmethod = decrypt(settings.SECRET_KEY[:16], unquote_plus(self.kwargs.get('uid'))).decode("utf-8").split(':')
+        kwargs.update({'request' : self.request, 'uid': useruidandmethod[1], 'method': useruidandmethod[0]})
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -105,9 +105,9 @@ class LoginSms(LoginView):
         return context
 
 class LoginBasic(LoginView):
-    template_name = 'authenticate/login/sms.html'
+    template_name = 'authenticate/login/basic.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({"howto": _.tpl_sms_code})
+        context.update({"howto": _.tpl_basic_code})
         return context

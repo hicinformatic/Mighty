@@ -1,5 +1,6 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
+from mighty.apps.authenticate.apps import AuthenticateConfig
 
 UserModel = get_user_model()
 class AuthBasicBackend(ModelBackend):
@@ -9,7 +10,10 @@ class AuthBasicBackend(ModelBackend):
         if username is None or password is None:
             return
         try:
-            user = UserModel._default_manager.get_by_natural_key(username)
+            if 'method' in kwargs and kwargs['method'] =='basic' and AuthenticateConfig.method.basic:
+                user = UserModel.objects.get(uid=username)
+            else:
+                user = UserModel._default_manager.get_by_natural_key(username)
         except UserModel.DoesNotExist:
             UserModel().set_password(password)
         else:
