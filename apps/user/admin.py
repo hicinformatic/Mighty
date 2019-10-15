@@ -9,9 +9,11 @@ from mighty.apps.user.forms import UserCreationForm
 
 
 if 'mighty.apps.nationality' in settings.INSTALLED_APPS:
-    personal_info_fields = ('email', 'phone', 'first_name', 'last_name', 'gender', 'nationalities')
+    personal_info_fields = ('email', 'phone', 'first_name', 'last_name', 'gender', 'nationalities',)
+    filter_horizontal = ('groups', 'user_permissions', 'nationalities',)
 else:
     personal_info_fields = ('email', 'phone', 'first_name', 'last_name', 'gender',)
+    filter_horizontal = ('groups', 'user_permissions',)
 
 class UserAdmin(OverAdmin, UserAdmin):
     add_form = UserCreationForm
@@ -26,7 +28,7 @@ class UserAdmin(OverAdmin, UserAdmin):
                 (_.a_ip, {'fields': ('ipv4', 'ipv6', 'sign')}),
                 (fset_default),
                 (fset_infos),)
-    filter_horizontal = ('groups', 'user_permissions', 'nationalities')
+    filter_horizontal = filter_horizontal
     readonly_fields = fields.full + ('key', 'tokens', 'codes', 'ipv4', 'ipv6', 'sign') 
     list_display = fields.list_display + ('email', 'gender', 'ipv4', 'ipv6') 
     list_filter = (InErrorListFilter, InAlertListFilter) + fields.list_filter + ('is_active', 'gender', 'is_staff', 'is_superuser')
