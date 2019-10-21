@@ -1,0 +1,63 @@
+{% extends "mighty/base.html" %}
+{% load mighty %}
+
+{% block content %}
+<section class="container">
+    <h1>{{ object }}</h1>
+    {% include "mighty/breadcrumb.html"%}
+
+    <div class="row justify-content-between">
+        <div class="col-4">
+            {% if has_list_permission %}
+            <a class="btn btn-secondary mb-1" href="{{ links.list }}" role="button"><i class="fas fa-list">&nbsp;</i>{{ titles.list }}</a>
+            {% endif %}
+            {% if has_change_permission %}
+            <a class="btn btn-secondary mb-1" href="{{ links.change }}" role="button"><i class="fas fa-edit">&nbsp;</i>{{ titles.change }}</a>
+            {% endif %}
+            {% if has_enable_permission and has_disable_permission %}
+            {% if object.is_disable %}
+            <a class="btn btn-success mb-1" href="{{ object.enable_url }}"><i class="fas fa-toggle-off">&nbsp;</i>{{ titles.enable }}</a>
+            {% else %}
+            <a class="btn btn-warning mb-1" href="{{ object.disable_url }}"><i class="fas fa-toggle-on">&nbsp;</i>{{ titles.disable }}</a>
+            {% endif %}
+            {% endif %}
+        </div>
+        <div class="col-4 text-right">
+            {% if has_delete_permission %}
+            <a class="btn btn-danger mb-1" href="{{ links.delete }}" role="button"><i class="fas fa-trash">&nbsp;</i>{{ titles.delete }}</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{% field_name object "username" %}</td><td>{{ object.username }}</td>
+                </tr>
+                <tr>
+                    <td>{% field_name object "last_name" %}</td><td>{% if object.last_name %}{{ object.last_name }}{% else %}{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>{% field_name object "first_name" %}</td><td>{% if object.first_name %}{{ object.first_name }}{% else %}{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>{% field_name object "gender" %}</td><td>{% if object.gender %}{{ object.gender }}{% else %}{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>{% field_name object "email" %}</td><td>{% if object.email %}{{ object.email }}{% else %}{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>{% field_name object "phone" %}</td><td>{% if object.phone %}{{ object.phone }}{% else %}{% endif %}</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+</section>
+{% endblock %}

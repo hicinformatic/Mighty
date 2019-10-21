@@ -33,9 +33,9 @@ class AdminEmailCheckStatus(CheckStatus, AdminView):
 
 UserModel = get_user_model()
 class Login(FormView):
-    model = UserModel
+    app_label = 'mighty'
+    model_name = 'authenticate'
     form_class = UserSearchForm
-    template_name = 'authenticate/login.html'
     permission_required = ()
     user = None
     method = None
@@ -70,12 +70,12 @@ class Login(FormView):
         return self.success_url
 
 class LoginView(BaseView, LoginView):
+    app_label = 'mighty'
+    model_name = 'authenticate'
     form_class = AuthenticateTwoFactorForm
 
     def get_header(self):
-        return {
-            'title': _.t_authenticate
-        }
+        return {'title': _.t_authenticate}
 
     def get_form_kwargs(self):
         kwargs = super(LoginView, self).get_form_kwargs()
@@ -89,24 +89,18 @@ class LoginView(BaseView, LoginView):
         return context
 
 class LoginEmail(LoginView):
-    template_name = 'authenticate/login/email.html'
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"howto": _.tpl_email_code})
         return context
 
 class LoginSms(LoginView):
-    template_name = 'authenticate/login/sms.html'
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"howto": _.tpl_sms_code})
         return context
 
 class LoginBasic(LoginView):
-    template_name = 'authenticate/login/basic.html'
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"howto": _.tpl_basic_code})

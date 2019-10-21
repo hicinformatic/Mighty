@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.conf import settings
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
 
 from mighty.models import user as models
 from mighty.apps.user.admin import UserAdmin
@@ -15,6 +16,10 @@ if 'mighty.apps.extend' in settings.INSTALLED_APPS:
     class UserHistoryAdminInline(HistoryAdminInline):
         model = models.UserHistory
     user_inlines = [UserExtendAdminInline, UserHistoryAdminInline]
+
+@admin.register(Group)
+class GroupAdmin(GroupAdmin):
+    pass
 
 @admin.register(Permission)
 class PermissionAdmin(admin.ModelAdmin):

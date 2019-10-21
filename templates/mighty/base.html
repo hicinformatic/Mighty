@@ -1,18 +1,37 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">
         <title>{{ header.title }}</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static "css/wr-easy.css" %}">
+        <link rel="stylesheet" href="{% static "css/wr-text.css" %}">
+        <link rel="stylesheet" href="{% static "css/wr-colors.css" %}">
+        <link rel="stylesheet" href="{% static "css/wr-border.css" %}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Orbitron"> 
         {% block file_css %}{% endblock %}
-        <style>{% block css %}{% endblock %}</style>
+        <style>
+        * { font-family: 'Orbitron', sans-serif; }
+        a { text-decoration: none;}
+        h1 { 
+            border-bottom: 1px solid black; 
+            margin: 20px 0;
+        }
+        .btn-action {
+            height: 40px;
+            display: inline-block;
+            line-height: 40px;
+            width: 180px;
+            text-align: center;
+        }
+        {% block css %}{% endblock %}
+        </style>
     </head>
-    <body>
+    <body class="">
+    <div class="wt-pr80 md-wt-pr100 mg-auto">
     {% block content %}{% endblock %}
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    </div>
     {% block file_js %}{% endblock %}
     <script>
     (function() {

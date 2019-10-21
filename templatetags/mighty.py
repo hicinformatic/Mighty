@@ -35,7 +35,8 @@ def field_value(obj, field):
         return str(obj)
     else:
         attr = getattr(obj, field)
-        return attr() if callable(attr) else attr
+    attr = attr() if callable(attr) else attr
+    return "" if attr is None else attr
 
 @register.filter(name='add_attr')
 def add_attr(field, css):

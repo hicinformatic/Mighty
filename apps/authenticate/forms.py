@@ -57,7 +57,7 @@ class UserSearchForm(forms.Form):
         try:
             useruidandmethod = '%s:%s' % (method, str(self.user_cache.uid))
             useruidandmethod = encrypt(settings.SECRET_KEY[:16], useruidandmethod).decode('utf-8')
-            self.success_url = reverse('mighty:%s-login' % method, kwargs={'uid': quote_plus(useruidandmethod)})
+            self.success_url = reverse('mighty:login-%s' % method, kwargs={'uid': quote_plus(useruidandmethod)})
         except NoReverseMatch:
             raise forms.ValidationError(self.error_messages['invalid_method'], code='invalid_method',)
         return self.cleaned_data

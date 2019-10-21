@@ -16,7 +16,12 @@ from mighty.functions import logger
 from mighty import _
 
 guardian = True if 'guardian' in settings.INSTALLED_APPS else False
-tpl = lambda a, n, t: ['%s/%s_%s.html' % (a, n, t), '%s/%s.html' % (a, t), '%s.html' % t, 'mighty/%s.html' % t, 'mighty/actions/%s.html' % t]
+tpl = lambda a, n, t: [
+    '%s.html' % t,
+    '%s_%s.html' % (n, t), '%s/%s.html' % (n, t), '%s/actions/%s.html' % (n, t),
+    '%s_%s.html' % (a, t), '%s/%s.html' % (a, t), '%s/actions/%s.html' % (a, t),
+    '%s/%s_%s.html' % (a, n, t), '%s/%s/%s.html' % (a, n, t),
+]
 
 class BaseView(PermissionRequiredMixin):
     template_name = None
@@ -24,6 +29,8 @@ class BaseView(PermissionRequiredMixin):
     slug_url_kwarg = "uid"
     paginate_by = 100
     permission_required = ()
+    app_label = None
+    model_name = None
 
     def has_object(self):
         return True if hasattr(self, 'object') and self.object is not None else False
@@ -91,10 +98,11 @@ class BaseView(PermissionRequiredMixin):
         return {}
 
     def get_template_names(self):
-        if self.has_model():
-            app = str(self.model._meta.app_label).lower()
-            name = str(self.model.__name__).lower()
-            return self.template_name or tpl(app, name, self.__class__.__name__)
+        app = name = None
+        app_label = self.app_label or str(self.model._meta.app_label).lower()
+        model_name = self.model_name or str(self.model.__name__).lower()
+        self.template_name = self.template_name or tpl(app_label, model_name, str(self.__class__.__name__).lower())
+        logger("mighty", "info", "template: %s" % self.template_name)
         return self.template_name
 
     def get_questions(self):

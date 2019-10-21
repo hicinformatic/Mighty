@@ -1,32 +1,40 @@
 {% extends "mighty/base.html" %}
 
-{% block content %}
-<section class="container">
-    <h1>{{ object }}</h1>
-    {% include "mighty/breadcrumb.html"%}
+{% block css %}
+td:first-child { font-weight: bold; }
+td { border-bottom: 1px solid black; }
+{% endblock %}
 
-    <div class="row justify-content-between">
-        <div class="col-4">
-            {% if has_list_permission %}
-            <a class="btn btn-secondary mb-1" href="{{ links.list }}" role="button"><i class="fas fa-list">&nbsp;</i>{{ titles.list }}</a>
-            {% endif %}
-            {% if has_change_permission %}
-            <a class="btn btn-secondary mb-1" href="{{ links.change }}" role="button"><i class="fas fa-edit">&nbsp;</i>{{ titles.change }}</a>
-            {% endif %}
-            {% if has_enable_permission and has_disable_permission %}
-            {% if object.is_disable %}
-            <a class="btn btn-success mb-1" href="{{ object.enable_url }}"><i class="fas fa-toggle-off">&nbsp;</i>{{ titles.enable }}</a>
-            {% else %}
-            <a class="btn btn-warning mb-1" href="{{ object.disable_url }}"><i class="fas fa-toggle-on">&nbsp;</i>{{ titles.disable }}</a>
-            {% endif %}
-            {% endif %}
-        </div>
-        <div class="col-4 text-right">
-            {% if has_delete_permission %}
-            <a class="btn btn-danger mb-1" href="{{ links.delete }}" role="button"><i class="fas fa-trash">&nbsp;</i>{{ titles.delete }}</a>
-            {% endif %}
+{% block content %}
+{% include "mighty/breadcrumb.html"%}
+<section class="">
+    <h1 class="c-white">{{ object }}</h1>
+
+    <div class="dp-flex wt-ch c-white-rs md-dp-block md-wt-pr100 mgy-px20">
+        <div>
+        {% if has_list_permission %}
+        <a class="btn-action bg12" href="{{ links.list }}" role="button"><i class="fas fa-list">&nbsp;</i>{{ titles.list }}</a>
+        {% endif %}
+    </div>
+    <div class="tx-al-right">
+        {% if has_change_permission %}
+        <a class="btn-action bg2" href="{{ links.change }}" role="button"><i class="fas fa-edit">&nbsp;</i>{{ titles.change }}</a>
+        {% endif %}
+        {% if has_enable_permission and has_disable_permission %}
+        {% if object.is_disable %}
+        <a class="btn-action bg2" href="{{ object.enable_url }}"><i class="fas fa-toggle-off">&nbsp;</i>{{ titles.enable }}</a>
+        {% else %}
+        <a class="btn-action bg3" href="{{ object.disable_url }}"><i class="fas fa-toggle-on">&nbsp;</i>{{ titles.disable }}</a>
+        {% endif %}
+        {% endif %}
+        {% if has_delete_permission %}
+        <a class="btn-action bg5" href="{{ links.delete }}" role="button"><i class="fas fa-trash">&nbsp;</i>{{ titles.delete }}</a>
+        {% endif %}
         </div>
     </div>
+    <article>
+    <h2>Detail</h2>
     {% include "mighty/minimize/detail.html" %}
+    </article>
 </section>
 {% endblock %}
