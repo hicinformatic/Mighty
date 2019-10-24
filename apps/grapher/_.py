@@ -22,3 +22,6 @@ f_Meter = _("Meter")
 f_Odometer = _("Odometer")
 f_Radialscatter = _("Radial scatter")
 f_Thermometer = _("Thermometer")
+
+v_graph = _('Graphique')
+vp_graph = _('Graphiques')

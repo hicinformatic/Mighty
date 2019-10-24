@@ -29,8 +29,10 @@ class GraphAdmin(OverAdmin):
         "Odometer",
         "Radialscatter",
         "Thermometer",
-    )})),)
-    list_filter = (
+    )})),
+    (fset_default),
+    (fset_infos),)
+    list_filter = (InErrorListFilter, InAlertListFilter) + (
         "title",
         "Bar",
         "Bipolar",

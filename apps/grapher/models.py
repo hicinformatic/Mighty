@@ -56,4 +56,6 @@ class Graph(ModelFull):
 
     class Meta(ModelFull.Meta):
         abstract = True
+        verbose_name = _.v_graph
+        verbose_name_plural = _.vp_graph
 

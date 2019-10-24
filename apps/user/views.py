@@ -12,7 +12,7 @@ class UserMe(DetailView):
         }
 
     def get_object(self, queryset=None):
-        return User.objects.all().first()
+        return self.request.user
 
 class UserViewSet(ModelViewSet):
     model = User
@@ -33,3 +33,5 @@ if 'rest_framework' in settings.INSTALLED_APPS:
         queryset = User.objects.all()
         serializer_class = UserSerializer
         filter_model = filters.UserFilter
+        model = User
+        serializer_class = UserSerializer
