@@ -17,4 +17,6 @@ if 'mighty.apps.permissions' in settings.INSTALLED_APPS:
 if 'mighty.apps.authenticate' in settings.INSTALLED_APPS:
     from mighty.models.authenticate import Email, Sms
 
+if 'mighty.apps.grapher' in settings.INSTALLED_APPS:
+    from mighty.models.grapher import Graph
 

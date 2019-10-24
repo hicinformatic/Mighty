@@ -23,3 +23,6 @@ if 'mighty.apps.permissions' in settings.INSTALLED_APPS:
 
 if 'mighty.apps.authenticate' in settings.INSTALLED_APPS:
     from mighty.admin import authenticate
+
+if 'mighty.apps.authenticate' in settings.INSTALLED_APPS:
+    from mighty.admin import grapher

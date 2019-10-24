@@ -44,8 +44,12 @@ class BaseView(PermissionRequiredMixin):
         }
 
     def get_header(self):
+        if hasattr(self, 'model'):
+            title = '%s | %s' % (self.model._meta.verbose_name, self.get_titles()[self.__class__.__name__])
+        else:
+            title = self.get_titles()[self.__class__.__name__]
         return {
-            'title': '%s | %s' % (self.model._meta.verbose_name, self.get_titles()[self.__class__.__name__])
+            'title': title
         }
 
     def get_titles(self):
@@ -98,9 +102,10 @@ class BaseView(PermissionRequiredMixin):
         return {}
 
     def get_template_names(self):
-        app = name = None
-        app_label = self.app_label or str(self.model._meta.app_label).lower()
-        model_name = self.model_name or str(self.model.__name__).lower()
+        app_label = model_name = None
+        if hasattr(self, 'model'):
+            app_label = self.app_label or str(self.model._meta.app_label).lower()
+            model_name = self.model_name or str(self.model.__name__).lower()
         self.template_name = self.template_name or tpl(app_label, model_name, str(self.__class__.__name__).lower())
         logger("mighty", "info", "template: %s" % self.template_name)
         return self.template_name

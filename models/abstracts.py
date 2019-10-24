@@ -142,8 +142,8 @@ class ModelImage(models.Model):
         abstract = True
 
     @property
-    def image_url(self):
-        return self.image.url
+    def image_html(self):
+        return format_html('<img src="%s" title="%s">' % (self.image.url, str(self)))
 
 class ModelDisplay(models.Model):
     display = models.CharField(_.f_display, blank=True, max_length=255, null=True)
@@ -201,7 +201,8 @@ class ModelSignHash(models.Model):
                 elif field.__class__.__name__ == "ManyToOneRel":
                     pass
                 else:
-                    signhash.append(getattr(self, field.name))
+                    if hasattr(self, field.name):
+                        signhash.append(getattr(self, field.name))
                 if "fields" in kwargs:
                     for field in kwargs["fields"]: signash.append(field)
             return sha256(str(signhash).encode('utf-8')).hexdigest()
