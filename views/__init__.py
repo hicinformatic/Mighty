@@ -29,6 +29,7 @@ class BaseView(PermissionRequiredMixin):
     slug_url_kwarg = "uid"
     paginate_by = 100
     permission_required = ()
+    no_permission = False
     app_label = None
     model_name = None
 
@@ -222,8 +223,9 @@ class ViewSet(object):
 
         for k, v in kwargs.items():
             setattr(View, k, v)
-        
-        View.permission_required = (self.model().perm(view),)
+
+        if not hasattr(View, "no_permission") or not View.no_permission:
+            View.permission_required = (self.model().perm(view),)
         View.model = self.model
         View.fields = self.fields
         if view == 'list':

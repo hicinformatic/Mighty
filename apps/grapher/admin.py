@@ -4,57 +4,19 @@ from mighty import fields
 from mighty.admin.site import fset_default, fset_infos, OverAdmin, InErrorListFilter, InAlertListFilter
 from mighty.apps.authenticate.views.authenticate import AdminEmailCheckStatus, AdminSmsCheckStatus
 from mighty.apps.authenticate import models
+from mighty.apps.grapher import fields
+
+class TemplateAdmin(OverAdmin):
+    fieldsets = (((None, {'fields': fields.template})),
+        (fset_default),
+        (fset_infos),)
+    list_filter = (InErrorListFilter, InAlertListFilter)
+    list_display = ('name',)
 
 class GraphAdmin(OverAdmin):
-    fieldsets = (((None, {'fields': (
-        "title",
-        "Bar",
-        "Bipolar",
-        "Funnel",
-        "Gauge",
-        "HorizontalBar",
-        "HorizontalProgressbars",
-        "Line",
-        "Pie",
-        "Radar",
-        "Rose",
-        "Scatter",
-        "SemicircularProgressbars",
-        "VerticalProgressbars",
-        "Waterfall",
-        "Donut",
-        "Fuel",
-        "Gantt",
-        "Meter",
-        "Odometer",
-        "Radialscatter",
-        "Thermometer",
-    )})),
-    (fset_default),
-    (fset_infos),)
-    list_filter = (InErrorListFilter, InAlertListFilter) + (
-        "title",
-        "Bar",
-        "Bipolar",
-        "Funnel",
-        "Gauge",
-        "HorizontalBar",
-        "HorizontalProgressbars",
-        "Line",
-        "Pie",
-        "Radar",
-        "Rose",
-        "Scatter",
-        "SemicircularProgressbars",
-        "VerticalProgressbars",
-        "Waterfall",
-        "Donut",
-        "Fuel",
-        "Funnel",
-        "Gantt",
-        "Meter",
-        "Odometer",
-        "Radialscatter",
-        "Thermometer",
-    )
+    fieldsets = (((None, {'fields': fields.graph})),
+        (fset_default),
+        (fset_infos),)
+    list_filter = (InErrorListFilter, InAlertListFilter)
     list_display = ('title',)
+    filter_horizontal = ('templates',)
