@@ -5,25 +5,36 @@ class RGraph(GraphBackend):
 
     @property
     def css(self):
-        return 'rgraph/rgraph.css'
+        return {
+            'canvas': 'rgraph/canvas/canvas.css',
+            'svg': 'rgraph/svg/svg.css',
+        }
 
     @property
     def html(self):
-        return 'rgraph/rgraph.html'
+        return {
+            'canvas': 'rgraph/canvas/canvas.html',
+            'svg': 'rgraph/svg/svg.html',
+        }
 
     @property
     def directory(self):
-        return 'rgraph/'
+        return {
+            'canvas': 'rgraph/canvas/',
+            'svg': 'rgraph/svg/',
+        }
 
     @property
     def common_lib(self):
         return {
+            'canvas': 'RGraph/libraries/RGraph.common.core.js',
             'svg': 'RGraph/libraries/RGraph.svg.common.core.js',
         }
 
     @property
     def ajax_bib(self):
         return {
+            'canvas': 'RGraph/libraries/RGraph.common.ajax.js',
             'svg': 'RGraph/libraries/RGraph.svg.common.ajax.js',
         }
 
@@ -41,7 +52,7 @@ class RGraph(GraphBackend):
             self.radar: 'RGraph/libraries/RGraph.svg.radar.js',
             self.rose: 'RGraph/libraries/RGraph.svg.rose.js',
             self.scatter: 'RGraph/libraries/RGraph.svg.scatter.js',
-            self.semicircularprogressba: 'RGraph/libraries/RGraph.svg.semicircularprogressba.js',
+            self.semicircularprogressbars: 'RGraph/libraries/RGraph.svg.semicircularprogressbars.js',
             self.verticalprogressbars: 'RGraph/libraries/RGraph.svg.verticalprogressbars.js',
             self.waterfall: 'RGraph/libraries/RGraph.svg.waterfall.js',
             self.donut: 'RGraph/libraries/RGraph.svg.donut.js',
@@ -66,7 +77,7 @@ class RGraph(GraphBackend):
             self.radar: 'RGraph/libraries/RGraph.radar.js',
             self.rose: 'RGraph/libraries/RGraph.rose.js',
             self.scatter: 'RGraph/libraries/RGraph.scatter.js',
-            self.semicircularprogressba: 'RGraph/libraries/RGraph.semicircularprogressba.js',
+            self.semicircularprogressbars: 'RGraph/libraries/RGraph.semicircularprogressba.js',
             self.verticalprogressbars: 'RGraph/libraries/RGraph.verticalprogressbars.js',
             self.waterfall: 'RGraph/libraries/RGraph.waterfall.js',
             self.donut: 'RGraph/libraries/RGraph.donut.js',

@@ -46,18 +46,16 @@ class GraphView(DetailView):
         context = super(GraphView, self).get_context_data(**kwargs)
         backend = import_string(settings.GRAPHER_BACKEND)
         self.backend = backend(self.object)
-        context.update({
-            'css': self.backend.css,
-            'html': self.backend.html,
-            'directory': self.backend.directory,
-            'templates': self.object.templates.all(),
-        })
+        context.update({ 'templates': self.object.templates.all() })
         return context
 
 class SvgView(GraphView):
     def get_context_data(self, **kwargs):
         context = super(SvgView, self).get_context_data(**kwargs)
         context.update({
+            'css': self.backend.css['svg'],
+            'html': self.backend.html['svg'],
+            'directory': self.backend.directory['svg'],
             'js': self.backend.libraries('svg'),
         })
         return context
@@ -65,7 +63,12 @@ class SvgView(GraphView):
 class CanvasView(GraphView):
     def get_context_data(self, **kwargs):
         context = super(CanvasView, self).get_context_data(**kwargs)
-        context.update({'js': self.backend.libraries('canvas')})
+        context.update({
+            'css': self.backend.css['canvas'],
+            'html': self.backend.html['canvas'],
+            'directory': self.backend.directory['canvas'],
+            'js': self.backend.libraries('canvas'),
+        })
         return context
 
 

@@ -8,7 +8,7 @@
     </head>
     <body>
     
-    <section id="chart-section">{% include html %}</section>
+    <section id="grapher-section">{% include html %}</section>
 
     {% for fjs in js %}
     <script src="{% static fjs %}"></script>
@@ -17,7 +17,6 @@
     <script>
         (function() {
             var graph_list = [];
-
             {% for template in templates %}
             {% include directory|add:template.graphtype|add:".js" %}
             {% endfor %}

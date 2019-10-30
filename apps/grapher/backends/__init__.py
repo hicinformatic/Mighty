@@ -12,7 +12,7 @@ class GraphBackend:
     radar = models.RADAR
     rose = models.ROSE
     scatter = models.SCATTER
-    semicircularprogressba = models.SEMICIRCULARPROGRESSBA
+    semicircularprogressbars = models.SEMICIRCULARPROGRESSBARS
     verticalprogressbars = models.VERTICALPROGRESSBARS
     waterfall = models.WATERFALL
     donut = models.DONUT

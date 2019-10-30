@@ -1,8 +1,9 @@
 from django.db import models
+from django.utils.html import mark_safe
+from django.template import Context, Template
 
 from mighty.models.abstracts import ModelFull
 from mighty.models import JSONField
-
 from mighty.apps.grapher import _
 
 BAR = "BAR"
@@ -16,7 +17,7 @@ PIE = "PIE"
 RADAR = "RADAR"
 ROSE = "ROSE"
 SCATTER = "SCATTER"
-SEMICIRCULARPROGRESSBA = "SEMICIRCULARPROGRESSBA"
+SEMICIRCULARPROGRESSBARS = "SEMICIRCULARPROGRESSBARS"
 VERTICALPROGRESSBARS = "VERTICALPROGRESSBARS"
 WATERFALL = "WATERFALL"
 DONUT = "DONUT"
@@ -37,7 +38,7 @@ choices = (
     (RADAR, _.c_radar),
     (ROSE, _.c_rose),
     (SCATTER, _.c_scatter),
-    (SEMICIRCULARPROGRESSBA, _.c_semicircularprogressba),
+    (SEMICIRCULARPROGRESSBARS, _.c_semicircularprogressbars),
     (VERTICALPROGRESSBARS, _.c_verticalprogressbars),
     (WATERFALL, _.c_waterfall),
     (DONUT, _.c_donut),
@@ -73,10 +74,8 @@ class Template(ModelFull):
     sm_text_size = models.PositiveSmallIntegerField(_.f_sm_text_size, default=10)
     sm_margin_inner = models.PositiveSmallIntegerField(_.f_sm_margin_inner, default=10)
 
-
-    options = JSONField()
-    responsive_options = JSONField()
-
+    options = JSONField(blank=True, null=True)
+    responsive_options = JSONField(blank=True, null=True)
 
     class Meta(ModelFull.Meta):
         abstract = True
@@ -86,12 +85,14 @@ class Template(ModelFull):
     def __str__(self):
         return self.name
 
-from django.utils.html import mark_safe
+
+
 class Graph(ModelFull):
     title = models.CharField(_.f_title, max_length=255)
     is_responsive = models.BooleanField(_.f_is_responsive, default=False)
-    values = JSONField()
-    container = models.TextField(_.f_container, blank=True, null=True)
+
+    svg_container = models.TextField(_.f_svg_container, blank=True, null=True)
+    canvas_container = models.TextField(_.f_canvas_container, blank=True, null=True)
 
     width = models.PositiveSmallIntegerField(_.f_width, default=800)
     height = models.PositiveSmallIntegerField(_.f_height, default=400)
@@ -100,31 +101,51 @@ class Graph(ModelFull):
     text_size = models.PositiveSmallIntegerField(_.f_text_size, default=14)
     margin_inner = models.PositiveSmallIntegerField(_.f_margin_inner, default=25)
 
-    options = JSONField()
-    responsive_options = JSONField()
+    options = JSONField(blank=True, null=True)
+    responsive_options = JSONField(blank=True, null=True)
+
+    bar_values = JSONField(blank=True, null=True)
+    bipolar_values = JSONField(blank=True, null=True)
+    funnel_values = JSONField(blank=True, null=True)
+    gauge_values = JSONField(blank=True, null=True)
+    horizontalbar_values = JSONField(blank=True, null=True)
+    horizontalprogressbars_values = JSONField(blank=True, null=True)
+    line_values = JSONField(blank=True, null=True)
+    pie_values = JSONField(blank=True, null=True)
+    radar_values = JSONField(blank=True, null=True)
+    rose_values = JSONField(blank=True, null=True)
+    scatter_values = JSONField(blank=True, null=True)
+    semicircularprogressbars_values = JSONField(blank=True, null=True)
+    verticalprogressbars_values = JSONField(blank=True, null=True)
+    waterfall_values = JSONField(blank=True, null=True)
+    donut_values = JSONField(blank=True, null=True)
+    gantt_values = JSONField(blank=True, null=True)
+    meter_values = JSONField(blank=True, null=True)
+    odometer_values = JSONField(blank=True, null=True)
+    radialscatter_values = JSONField(blank=True, null=True)
+    thermometer_values = JSONField(blank=True, null=True)
 
     class Meta(ModelFull.Meta):
         abstract = True
         verbose_name = _.v_graph
         verbose_name_plural = _.vp_graph
 
-    @property
-    def labels(self):
-        return [key for key, value in self.values.items()]
+    def labels(self, field):
+        return [key for key, value in getattr(self, '%s_values' % field).items()]
+
+    def labels_str(self, field):
+        return mark_safe(str(self.labels(field)))
+
+    def datas(self, field):
+        return [value for key, value in getattr(self, '%s_values' % field).items()]
+    
+    def datas_str(self, field):
+        return mark_safe(str(self.datas(field)))
 
     @property
-    def labels_str(self):
-        return mark_safe(str(self.labels))
+    def get_svg_container(self):
+        return Template(self.svg_container).render(Context({'object': self,}))
 
     @property
-    def data(self):
-        return [value for key, value in self.values.items()]
-
-    @property
-    def data_str(self):
-        return mark_safe(str([value for key, value in self.values.items()]))
-
-    @property
-    def get_container(self):
-        from django.template import Context, Template
-        return Template(self.container).render(Context({'object': self,}))
+    def get_svg_container(self):
+        return Template(self.canvas_container).render(Context({'object': self,}))
