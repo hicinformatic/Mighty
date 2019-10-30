@@ -7,14 +7,16 @@
 
 {% block form %}
 <form class="signin mg-tp-px20" method="post">{% csrf_token %}
+    {% if form.non_field_errors %}<div class="tx-al-left pg-bt-px20">{{ form.non_field_errors }}</div>{% endif %}
+    
+    <div class="tx-al-center">
+        <label for="{{ form.password.id_for_label }}" class="dp-block mg-bt-px5 pg-rg-px20">{{ howto }}</label>
+        {% with attr="class:wt-pr100 mx-wt-px500 lh-px25,placeholder:"|add:form.password.help_text|safe %}
+        {{ form.password|add_attr:attr }}
+        {% endwith %}
+    </div>
 
-    {{ form.non_field_errors }}
-    <label for="{{ form.password.id_for_label }}" class="dp-block mg-bt-px5 pg-rg-px20">{{ howto }}</label>
-    {% with attr="class:wt-pr100 mx-wt-px500,placeholder:"|add:form.password.help_text|safe %}
-    {{ form.password|add_attr:attr }}
-    {% endwith %}
-
-    <div class="pgy-px10">
+    <div class="pgy-px10 tx-al-center">
         <button class="pg-px10-ch md-wt-pr100" type="submit" name="Submit">
             <i class="fas fa-sign-in-alt">&nbsp;</i>{{ submit }}
         </button>

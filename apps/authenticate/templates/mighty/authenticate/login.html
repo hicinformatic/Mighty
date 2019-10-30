@@ -7,7 +7,7 @@ small { border-bottom: 1px solid black; }
 {% endblock %}
 
 {% block content %}
-<section class="mg-auto wt-pr40 md-wt-px300 bg-c-gainsboro mg-tp-px100 md-mg-tp-px0">
+<section class="mg-auto wt-pr50 md-wt-px400 sm-wt-pr100 bg-c-gainsboro mg-tp-px100 md-mg-tp-px0 omd-bd-rd-px20">
     {% block logo %}
     <div class="tx-al-center pgy-px10">
         <img src="{% static "login_logo.png" %}" class="mx-wt-px250">
@@ -21,12 +21,14 @@ small { border-bottom: 1px solid black; }
         
         {% block form %}
         <form class="signin mg-tp-px20" method="post">{% csrf_token %}
-            {{ form.non_field_errors }}
+            {% if form.non_field_errors %}<div class="tx-al-left pg-bt-px20">{{ form.non_field_errors }}</div>{% endif %}
         
-            <label for="{{ form.search.id_for_label }}" class="dp-block mg-bt-px5 pg-rg-px20">{{ form.search.label }}</label>
-            {% with attr="class:wt-pr100 mx-wt-px500,placeholder:"|add:form.search.help_text|safe %}
-            {{ form.search|add_attr:attr }}
-            {% endwith %}
+            <div class="tx-al-center">
+                <label for="{{ form.search.id_for_label }}" class="dp-block mg-bt-px5 pg-rg-px20">{{ form.search.label }}</label>
+                {% with attr="class:wt-pr100 mx-wt-px500 lh-px25,placeholder:"|add:form.search.help_text|safe %}
+                {{ form.search|add_attr:attr }}
+                {% endwith %}
+            </div>
 
             <div class="">
                     <small class="dp-block mg-tp-px20 mg-bt-px10"><b>{{ send_method }}</b></small>

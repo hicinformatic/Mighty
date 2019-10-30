@@ -21,12 +21,12 @@ class CheckStatus(DetailView):
         context.update({'status': status})
         return context
 
-class AdminSmsCheckStatus(CheckStatus, AdminView):
+class AdminSmsCheckStatus(AdminView, CheckStatus):
     template_name = 'authenticate/admin/check.html'
     model = Sms
     permission_required = ('mighty:view_sms', 'mighty:check_sms')
 
-class AdminEmailCheckStatus(CheckStatus, AdminView):
+class AdminEmailCheckStatus(AdminView, CheckStatus):
     template_name = 'authenticate/admin/check.html'
     model = Email
     permission_required = ('mighty:view_email', 'mighty:check_email')

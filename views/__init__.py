@@ -45,13 +45,11 @@ class BaseView(PermissionRequiredMixin):
         }
 
     def get_header(self):
-        if hasattr(self, 'model'):
-            title = '%s | %s' % (self.model._meta.verbose_name, self.get_titles()[self.__class__.__name__])
-        else:
-            title = self.get_titles()[self.__class__.__name__]
-        return {
-            'title': title
-        }
+        if self.__class__.__name__ in self.get_titles():
+            if hasattr(self, 'model'):
+                return { 'title': '%s | %s' % (self.model._meta.verbose_name, self.get_titles()[self.__class__.__name__]) }
+            return { 'title': self.get_titles()[self.__class__.__name__] }
+        return { 'title': None }
 
     def get_titles(self):
         return {
@@ -83,6 +81,9 @@ class BaseView(PermissionRequiredMixin):
                     'detail': model.detail_url,
                     'change': model.change_url,
                     'delete': model.delete_url,
+                })
+            if hasattr(model, 'enable_url') or hasattr(model, 'disable_url'):
+                urls.update({
                     'enable': model.enable_url,
                     'disable': model.disable_url,
                 })
@@ -107,6 +108,8 @@ class BaseView(PermissionRequiredMixin):
         if hasattr(self, 'model'):
             app_label = self.app_label or str(self.model._meta.app_label).lower()
             model_name = self.model_name or str(self.model.__name__).lower()
+        if self.app_label: app_label = self.app_label
+        if self.model_name: model_name = self.model_name
         self.template_name = self.template_name or tpl(app_label, model_name, str(self.__class__.__name__).lower())
         logger("mighty", "info", "template: %s" % self.template_name)
         return self.template_name
@@ -117,6 +120,12 @@ class BaseView(PermissionRequiredMixin):
             "enable": _.tpl_enable,
             "delete": _.tpl_delete,
             'admin_view':  _.tpl_admin_view,
+        }
+
+    def get_translate(self):
+        return {
+            "logout": "Déconnexion",
+            "admin": "Administration",
         }
 
     def get_context_data(self, **kwargs):
@@ -130,6 +139,7 @@ class BaseView(PermissionRequiredMixin):
             'has_object': self.has_object(),
             'questions': self.get_questions(),
             'view': self.__class__.__name__,
+            'translate': self.get_translate(),
         })
         context.update(self.get_permissions())
         if hasattr(self, "model"):
@@ -193,6 +203,7 @@ class AdminView(object):
         context = super(AdminView, self).get_context_data(**kwargs)
         opts = self.model._meta
         context.update({
+            'opts': opts,
             'app_label': opts.app_label,
             'original': self.get_object(),
             'has_change_permission': self.request.user.has_perm(self.model.perm(self.model, 'change')),

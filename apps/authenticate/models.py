@@ -19,6 +19,7 @@ class Template(ModelBase, ModelPermissions):
     
     class Meta(ModelBase.Meta):
         abstract = True
+        ordering = ['-date_create',]
 
     def __str__(self):
         return "%s - %s" % (self.user, self.status)
