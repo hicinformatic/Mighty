@@ -3,7 +3,6 @@ from django.urls import include, path
 from mighty import fields
 from mighty.admin.site import fset_default, fset_infos, OverAdmin, InErrorListFilter, InAlertListFilter
 from mighty.apps.authenticate.views.authenticate import AdminEmailCheckStatus, AdminSmsCheckStatus
-from mighty.apps.authenticate import models
 from mighty.apps.grapher import fields
 
 class TemplateAdmin(OverAdmin):

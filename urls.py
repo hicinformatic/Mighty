@@ -13,7 +13,6 @@ if 'mighty.apps.user' in settings.INSTALLED_APPS:
     from mighty.apps.user import urls as urls_user
     urlpatterns += urls_user.urlpatterns
 
-
 if 'mighty.apps.authenticate' in settings.INSTALLED_APPS:
     from mighty.apps.authenticate import urls as urls_authenticate
     urlpatterns += urls_authenticate.urlpatterns

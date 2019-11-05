@@ -125,6 +125,7 @@ class BaseView(PermissionRequiredMixin):
     def get_translate(self):
         return {
             "logout": "Déconnexion",
+            "login": "Connexion",
             "admin": "Administration",
         }
 

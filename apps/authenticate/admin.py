@@ -1,9 +1,8 @@
 from django.urls import include, path
 
 from mighty import fields
-from mighty.admin.site import fset_default, fset_infos, OverAdmin, InErrorListFilter, InAlertListFilter
+from mighty.admin.site import OverAdmin
 from mighty.apps.authenticate.views.authenticate import AdminEmailCheckStatus, AdminSmsCheckStatus
-from mighty.apps.authenticate import models
 
 class SmsAdmin(OverAdmin):
     fieldsets = (((None, {'fields': ('user', 'status', 'backend', 'response', 'sms')})),)

@@ -5,7 +5,7 @@ from mighty.models import JSONField
 from mighty.models.abstracts import ModelFull
 from mighty.functions import key, randomcode
 
-from mighty.apps.user import _, fields
+from mighty.apps.user import _
 from mighty.apps.user.apps import UserConfig as conf
 from mighty.apps.user.manager import UserManager
 
@@ -53,7 +53,7 @@ class User(AbstractUser, ModelFull):
         return getattr(self, self.USERNAME_FIELD)
 
     def set_signhash(self, *args, **kwargs):
-        kwargs["notsignhash"] = fields.notsignhash
+        kwargs["notsignhash"] = ( 'date_joined', 'last_login', 'password', 'user_permissions', 'groups', 'nationalities', )
         signhash = self.get_signhash(*args, **kwargs)
         try:
             exist = self._meta.model.objects.get(signhash=signhash)

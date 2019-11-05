@@ -7,7 +7,6 @@ from mighty.apps.user import models, _
 from mighty.apps.user.apps import UserConfig as conf
 from mighty.apps.user.forms import UserCreationForm
 
-
 if 'mighty.apps.nationality' in settings.INSTALLED_APPS:
     personal_info_fields = ('email', 'phone', 'first_name', 'last_name', 'gender', 'nationalities',)
     filter_horizontal = ('groups', 'user_permissions', 'nationalities',)

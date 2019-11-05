@@ -7,9 +7,7 @@ class UserMe(DetailView):
     fields = ('last_name', 'first_name', 'email', 'phone', 'gender',)
 
     def get_header(self):
-        return {
-            'title': 'me',
-        }
+        return {'title': 'me',}
 
     def get_object(self, queryset=None):
         return self.request.user

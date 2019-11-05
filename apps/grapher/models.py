@@ -85,8 +85,6 @@ class Template(ModelFull):
     def __str__(self):
         return self.name
 
-
-
 class Graph(ModelFull):
     title = models.CharField(_.f_title, max_length=255)
     is_responsive = models.BooleanField(_.f_is_responsive, default=False)

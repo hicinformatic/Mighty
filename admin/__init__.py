@@ -3,7 +3,6 @@ from django.contrib.auth.models import Permission
 from django.conf import settings
 
 from mighty.admin.site import AdminSite
-from mighty import _
 
 mysite = AdminSite()
 admin.site = mysite
