@@ -3,7 +3,6 @@ from django.conf import settings
 
 app_name = 'mighty'
 urlpatterns = []
-apipatterns = []
 
 if 'mighty.apps.nationality' in settings.INSTALLED_APPS:
     from mighty.apps.nationality import urls as urls_nationality

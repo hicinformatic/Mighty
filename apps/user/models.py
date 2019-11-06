@@ -70,7 +70,7 @@ class User(AbstractUser, ModelFull):
         return False
 
     def check_code(self, code):
-        if code in self.codes:
+        if self.codes is not None and code in self.codes:
             return True
         return False
 

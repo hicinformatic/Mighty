@@ -12,7 +12,8 @@ class TwoFactorBackend(ModelBackend):
             UserModel().set_password(password)
         else:
             if user.check_code(password) and self.user_can_authenticate(user):
-                user.get_client_ip(request)
+                if hasattr(request, 'META'):
+                    user.get_client_ip(request)
                 user.consume_code(password)
                 return user
 

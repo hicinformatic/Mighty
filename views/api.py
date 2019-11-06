@@ -39,6 +39,7 @@ class EnableApiView(DestroyAPIView):
 
 class ApiModelViewSet(ModelViewSet):
     permission_classes = [HasMightyPermission]
+    lookup_field = 'uid'
     views = {
         'list':    { 'view': ListAPIView, 'url': '' },
         'add':     { 'view': CreateAPIView, 'url': 'add/' },
@@ -54,7 +55,7 @@ class ApiModelViewSet(ModelViewSet):
         View.permission_classes = self.permission_classes
         View.queryset = self.queryset
         View.serializer_class = self.serializer_class
-        View.lookup_field = 'pk'
+        View.lookup_field = self.lookup_field
         return View
 
     def name(self, view):

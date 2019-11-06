@@ -18,5 +18,6 @@ class AuthBasicBackend(ModelBackend):
             UserModel().set_password(password)
         else:
             if user.check_password(password) and self.user_can_authenticate(user):
-                user.get_client_ip(request)
+                if hasattr(request, 'META'):
+                    user.get_client_ip(request)
                 return user
