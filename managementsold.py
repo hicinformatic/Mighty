@@ -51,6 +51,32 @@ class BaseCommand(BaseCommand):
         sys.stdout.write("\rPercent: [{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
         sys.stdout.flush()
 
+    def getSource(self, field):
+        if self.source:
+            if field in self.source:
+                return self.source[field]
+            elif "default" in self.source:
+                return self.source["default"]
+        return False
+
+    def getOrNone(self, data):
+        return data if not test(data) else None
+
+    def getInt(self, number):
+        if test(number):
+            try:
+                return int(number)
+            except Exception as e:
+                self.error('number', 'Not integer line: %s number: "%s"' % (self.row, number))
+                return None
+        return None
+
+    def getFloat(self, integer):
+        return float(str(integer).strip().replace(u'\xa0', u' ').replace(' ', '').replace(',', '').replace('€', '').replace('%', ''))
+
+    def getNumber(self, integer):
+        return int(str(integer).strip().replace(u'\xa0', u' ').replace(' ', '').replace(',', '').replace('€', '').replace('%', ''))
+
 class updateModel(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--progressbar', default=False)
@@ -89,31 +115,6 @@ class AddModelFromCSV(BaseCommand):
                 return line[self.afields[field]].strip()
         return value.strip()
 
-    def getSource(self, field):
-        if self.source:
-            if field in self.source:
-                return self.source[field]
-            elif "default" in self.source:
-                return self.source["default"]
-        return False
-
-    def getOrNone(self, data):
-        return data if not test(data) else None
-
-    def getInt(self, number):
-        if test(number):
-            try:
-                return int(number)
-            except Exception as e:
-                self.error('number', 'Not integer line: %s number: "%s"' % (self.row, number))
-                return None
-        return None
-
-    def getFloat(self, integer):
-        return float(str(integer).strip().replace(u'\xa0', u' ').replace(' ', '').replace(',', '').replace('€', '').replace('%', ''))
-
-    def getNumber(self, integer):
-        return int(str(integer).strip().replace(u'\xa0', u' ').replace(' ', '').replace(',', '').replace('€', '').replace('%', ''))
 
     def add_arguments(self, parser):
         parser.add_argument('--csv', required=True)

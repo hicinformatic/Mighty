@@ -15,6 +15,7 @@ class Config:
     class Test:
         search = ['none', '', 0, 'na', 'n/a', '-', '/', '\\', '?', '??', '#n/a', '#value!', 'nc', 'n/c', 'ns',]
         replace = ['_', ';', ',']
+        intflt_toreplace = [' ', ',', '€', '$', '%']
 
     class Crypto:
         BS = 16

@@ -38,6 +38,9 @@ class ModelBase(models.Model):
     GENERATE_SIGNHASH = False
     CAN_ASK_FOR_PERMISSIONS = False
 
+    def fields(self):
+        return self._meta.get_fields()
+
     @property
     def app_label(self):
         return str(self._meta.app_label)
@@ -188,9 +191,6 @@ class ModelSignHash(models.Model):
     def validate_unique(self, exclude=None):
         self.set_signhash()
         super().validate_unique(exclude)
-
-    def fields(self):
-        return self._meta.get_fields()
 
     def get_signhash(self, *args, **kwargs):
         if self.GENERATE_SIGNHASH:

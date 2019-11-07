@@ -10,12 +10,27 @@ unpad = lambda s : s[:-ord(s[len(s)-1:])]
 def test(input_str=None):
     return True if str(input_str).strip().lower().replace(' ', '') not in MightyConfig.Test.search else False
 
+def get_or_none(data):
+    return data if not test(data) else None
+
 def key(size=32):
     return ''.join(random.choice(string.hexdigits) for x in range(size))
 
 def randomcode(stringLength):
     letters = "123456789"
     return ''.join(random.choice(letters).upper() for i in range(stringLength))
+
+def make_float(flt):
+    flt = str(flt).strip().replace(u'\xa0', u' ')
+    for s in MightyConfig.intflt_toreplace:
+        flt = flt.replate(s, '')
+    return float(flt)
+
+def make_int(itg):
+    itg = str(itg).strip().replace(u'\xa0', u' ')
+    for s in MightyConfig.intflt_toreplace:
+        itg = itg.replate(s, '')
+    return int(itg)
 
 def encrypt(key, raw):
     raw = pad(raw)
