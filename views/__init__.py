@@ -17,10 +17,10 @@ from mighty import _
 
 guardian = True if 'guardian' in settings.INSTALLED_APPS else False
 tpl = lambda a, n, t: [
-    '%s.html' % t,
-    '%s_%s.html' % (n, t), '%s/%s.html' % (n, t), '%s/actions/%s.html' % (n, t),
-    '%s_%s.html' % (a, t), '%s/%s.html' % (a, t), '%s/actions/%s.html' % (a, t),
     '%s/%s_%s.html' % (a, n, t), '%s/%s/%s.html' % (a, n, t),
+    '%s_%s.html' % (a, t), '%s/%s.html' % (a, t), '%s/actions/%s.html' % (a, t),
+    '%s_%s.html' % (n, t), '%s/%s.html' % (n, t), '%s/actions/%s.html' % (n, t),
+    '%s.html' % t,
 ]
 
 class BaseView(PermissionRequiredMixin):

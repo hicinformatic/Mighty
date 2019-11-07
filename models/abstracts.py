@@ -145,6 +145,10 @@ class ModelImage(models.Model):
     def image_html(self):
         return format_html('<img src="%s" title="%s">' % (self.image.url, str(self)))
 
+    @property
+    def image_url(self):
+        return self.image.url
+
 class ModelDisplay(models.Model):
     display = models.CharField(_.f_display, blank=True, max_length=255, null=True)
     SHOW_DISPLAY_IN_URL = True

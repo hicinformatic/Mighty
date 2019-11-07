@@ -4,4 +4,4 @@ from mighty.models.nationality import Nationality
 class NationalitySerializer(ModelSerializer):
     class Meta:
         model = Nationality
-        fields = ('__all__')
+        fields = ('country', 'alpha2', 'alpha3', 'numeric', 'image_url',)

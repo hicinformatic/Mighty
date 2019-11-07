@@ -1,0 +1,76 @@
+.mighty-mtables { position: relative;  margin-top: 5px; }
+.mighty-mtable-table { border-left: 1px solid black; }
+.mighty-mtable-th { border-top: 1px solid black; background: white;}
+.mighty-mtable-th { position: sticky; top: 0px; z-index: 5; }
+.mighty-mtable-th,
+.mighty-mtable-td {
+    background: white;
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+    max-width: 300px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.mighty-mtable-title.order { cursor: pointer; }
+.mighty-mtable-trbody:nth-child(2n+1) > .mighty-mtable-td { background: rgba(0, 0, 0, 0.1); }
+.mighty-mtable-title:hover,
+.mighty-mtable-trbody:nth-child(2n+1) > .mighty-mtable-td:hover { background: rgba(0, 0, 0, 0.2); }
+.mighty-mtable-title.order .mighty-mtable-title-icons-order { filter: opacity(0.4); }
+.mighty-mtable-title.order.active .mighty-mtable-title-icons-order { filter: opacity(1); }
+.mighty-mtable-th .mighty-mtable-title,
+.mighty-mtable-td .mighty-mtable-data { padding: 3px; text-align: center; }
+.mighty-mtable-td .mighty-mtable-data  * { text-align: center; vertical-align: middle; }
+.mighty-mtable-td .mighty-mtable-data > a { color: black; text-align: left; display: block; text-decoration: none; }
+.mighty-mtable-td .picture,
+.mighty-mtable-td .logo {
+    height: 40px;
+    background-size: contain;
+    background-color: white;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: grayscale(100%);
+    display: inline-block;
+}
+.mighty-mtable-td .picture { border-radius: 50%; width: 40px; }
+.mighty-mtable-td .logo { border-radius: 10px; width: 80px; }
+.loading:before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.3) center center no-repeat url('loader.svg');
+}
+
+.mighty-cmd-displayer-list { background: white; position: absolute; z-index: 10; text-align: left; padding: 5px; }
+.mighty-cmd-displayer-list button,
+.mighty-cmd-displayer-list label { display: block; }
+.mighty-cmd-displayer-list button { width: 80%; margin: 2px auto; }
+.mighty-cmd-paginate,
+.mighty-cmd-counter, .mighty-cmd-counter *,
+.mighty-cmd-search, .mighty-cmd-search *,
+.mighty-cmd-searchex, .mighty-cmd-searchex *,
+.mighty-cmd-displayer, .mighty-cmd-displayer  * {
+    color: black;
+    background: white;
+    display: inline-block;
+    vertical-align: middle;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+select.mighty-cmd-paginate,
+label.mighty-cmd-search,
+button.mighty-cmd-displayer {  border: 1px solid black; }
+.mighty-cmd-paginate,
+.mighty-cmd-counter,
+.mighty-cmd-search,
+.mighty-cmd-searchex,
+.mighty-cmd-displayer { margin-right: 1px; height: 35px; }
+input.mighty-cmd-search { height: 30px; }
+.mighty-cmd-counter span,
+.mighty-cmd-search span,
+.mighty-cmd-searchex span { line-height: 30px; }

@@ -18,10 +18,10 @@ def has_perm(obj, user, perm):
 @register.simple_tag(name='field_name')
 def field_name(obj, field):
     if field == '__str__':
-        return obj._meta.verbose_name.title()
+        return obj._meta.verbose_name
     else:
         try:
-            return obj._meta.get_field(field).verbose_name.title()
+            return obj._meta.get_field(field).verbose_name
         except FieldDoesNotExist:
             try:
                 return getattr(obj, field).short_description

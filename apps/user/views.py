@@ -12,6 +12,14 @@ class UserMe(DetailView):
     def get_object(self, queryset=None):
         return self.request.user
 
+    def get_context_data(self, **kwargs):
+        context = super(UserMe, self).get_context_data(**kwargs)
+        if "oauth2_provider" in settings.INSTALLED_APPS:
+            from oauth2_provider.models import Application
+            applications = Application.objects.filter(user=self.object)
+            context.update({'applications': applications})
+        return context
+
 class UserViewSet(ModelViewSet):
     model = User
     filter_model = filters.UserFilter

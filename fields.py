@@ -7,7 +7,7 @@ signhash = ('signhash',)
 disable = ('is_disable',)
 alert = ('alerts',)
 error = ('errors',)
-full = base + modeluid + image + display + tosearch + signhash + disable + alert + error
+full = base + modeluid + display + tosearch + signhash + disable + alert + error
 
 readonly_fields =  base + modeluid + tosearch + signhash + disable + alert + error
 list_display = display + disable
