@@ -4,4 +4,4 @@ from mighty.models.user import User
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ('username',)
+        fields = ('username', 'uid')

@@ -10,12 +10,12 @@ class TemplateAdmin(OverAdmin):
         (fset_default),
         (fset_infos),)
     list_filter = (InErrorListFilter, InAlertListFilter)
-    list_display = ('name',)
+    list_display = ('name', 'uid')
 
 class GraphAdmin(OverAdmin):
     fieldsets = (((None, {'fields': fields.graph})),
         (fset_default),
         (fset_infos),)
     list_filter = (InErrorListFilter, InAlertListFilter)
-    list_display = ('title',)
+    list_display = ('title', 'svg_url_html', 'canvas_url_html')
     filter_horizontal = ('templates',)

@@ -16,6 +16,7 @@ class Filter(object):
     }
 
     def __init__(self, request, model):
+        self.queryset = None
         self.model = model
         self.request = request
         self.filters = {}
@@ -191,7 +192,7 @@ class Filter(object):
             
     def get(self):
         logger("mighty", "info", "model: %s" % self.model.__name__, self.request.user)
-        queryset = self.model.objects
+        queryset = self.queryset if self.queryset else self.model.objects
         if self.select_related: queryset = queryset.select_related(*self.select_related)
         if self.prefetch_related: queryset = queryset.prefetch_related(*self.prefetch_related)
 
@@ -218,7 +219,7 @@ class Filter(object):
         distinct = self.distinct()
         logger("mighty", "info", "distinct: %s" % distinct, self.request.user)
         if distinct:
-            dqueryset = self.model.objects
+            dqueryset = self.queryset if self.queryset else self.model.objects
             if self.select_related: dqueryset = dqueryset.select_related(*self.select_related)
             if self.prefetch_related: dqueryset = dqueryset.prefetch_related(*self.prefetch_related)
             q.add(Q(id__in=dqueryset.filter(q).order_by(*distinct).distinct(*distinct).values_list('id', flat=True)), Q.AND)

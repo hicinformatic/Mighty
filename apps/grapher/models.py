@@ -128,18 +128,6 @@ class Graph(ModelFull):
         verbose_name = _.v_graph
         verbose_name_plural = _.vp_graph
 
-    def labels(self, field):
-        return [key for key, value in getattr(self, '%s_values' % field).items()]
-
-    def labels_str(self, field):
-        return mark_safe(str(self.labels(field)))
-
-    def datas(self, field):
-        return [value for key, value in getattr(self, '%s_values' % field).items()]
-    
-    def datas_str(self, field):
-        return mark_safe(str(self.datas(field)))
-
     @property
     def get_svg_container(self):
         return Template(self.svg_container).render(Context({'object': self,}))
@@ -147,3 +135,19 @@ class Graph(ModelFull):
     @property
     def get_svg_container(self):
         return Template(self.canvas_container).render(Context({'object': self,}))
+
+    @property
+    def svg_url(self):
+        return self.get_url('svg', kwargs={'uid': str(self.uid)})
+
+    @property
+    def svg_url_html(self):
+        return self.get_url_html('svg', self.title)
+
+    @property
+    def canvas_url(self):
+        return self.get_url('canvas', kwargs={'uid': str(self.uid)})
+
+    @property
+    def canvas_url_html(self):
+        return self.get_url_html('canvas', self.title)
