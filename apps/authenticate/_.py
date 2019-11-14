@@ -30,6 +30,8 @@ tpl_txt = _("Voici votre code de vérification personnel pour vous connecter au 
 tpl_email_code = _("Entrez le code reçu par Email:")
 tpl_sms_code = _("Entrez le code reçu par SMS:")
 tpl_basic_code = _("Entez votre mot de passe:")
+tpl_logout = _("Vous avez ete déconnecté.")
+tpl_home = _("Accueil")
 
 send_method = _("Authentification par")
 send_basic = _("Authentification par mot de passe")
@@ -40,6 +42,7 @@ method_sms = _("SMS")
 method_basic = _("Mot de passe")
 
 t_authenticate = _("On se connait déjà?")
+t_login = _("Â bientôt")
 
 v_sms = _('SMS')
 v_email = _('Email')

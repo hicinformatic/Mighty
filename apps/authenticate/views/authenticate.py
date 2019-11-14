@@ -1,4 +1,4 @@
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -104,4 +104,16 @@ class LoginBasic(LoginView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"howto": _.tpl_basic_code})
+        return context
+
+class Logout(BaseView, LogoutView):
+    app_label = 'mighty'
+    model_name = 'authenticate'
+
+    def get_header(self):
+        return {'title': _.t_login}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"howto": _.tpl_logout, "home": _.tpl_home})
         return context
