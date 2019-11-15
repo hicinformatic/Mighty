@@ -32,7 +32,7 @@ class RGraph(GraphBackend):
         }
 
     @property
-    def ajax_bib(self):
+    def ajax_lib(self):
         return {
             'canvas': 'js/RGraph/libraries/RGraph.common.ajax.js',
             'svg': 'js/RGraph/libraries/RGraph.svg.common.ajax.js',
