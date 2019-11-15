@@ -329,3 +329,16 @@ class ModelFull(ModelUid, ModelBase, ModelDisable, ModelError, ModelAlert, Model
     class Meta(ModelPermissions.Meta):
         abstract = True
 
+class ModelSource(models.Model):
+    sources = JSONField(_.f_sources, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def add_source(self, field, source, save=False):
+        self.source[field] = source
+        if save: self.save()
+
+    def delete_source(self, field, save=False):
+        del self.source[field]
+        if save: self.save()

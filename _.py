@@ -22,6 +22,7 @@ f_alerts = _('Alertes')
 f_errors = _('Erreurs')
 f_default = _('Défaut')
 f_infos = _('Informations')
+f_sources = _('Sources')
 
 t_add  = _('Ajouter')
 t_list  = _('Liste')

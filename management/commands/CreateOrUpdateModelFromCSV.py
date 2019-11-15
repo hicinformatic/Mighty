@@ -1,5 +1,4 @@
 from django.core.management.base import CommandError
-from django.apps import apps
 from os.path import isfile
 import csv, uuid
 
@@ -8,8 +7,14 @@ from mighty.management import BaseCommand
 class Command(BaseCommand):
     fields_forbidden = ['id',]
     fields_retrieve = ['uid',]
+    fields_associates = {}
     total_rows = 0
     current_row = 0
+    source = {}
+
+    def create_parser(self, prog_name, subcommand, **kwargs):
+        self.subcommand = subcommand
+        return super().create_parser(prog_name, subcommand)
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -22,12 +27,11 @@ class Command(BaseCommand):
     def check_row(self, row):
         for field in self.fields_retrieve:
             if not self.test(row[field]):
-                self.error.add(field, "Test fail")
+                self.error.add(field, "Test fail", self.current_row)
                 return False
         return True
 
     def do(self, options):
-        self.model = apps.get_model(options.get('label'), options.get('model'))
         self.csv = options.get('csv')
         self.comma = options.get('comma')
         self.encoding = options.get('encoding')
@@ -48,15 +52,6 @@ class Command(BaseCommand):
                     else: self.logger.error('Check datas failed')
                 self.current_row += 1
     
-    def get_uid(self, uid):
-        return uuid.UUID('{%s}' % uid)
-
-    def field(self, field, row):
-        #print(row[field])
-        if hasattr(self, 'get_%s' % field):
-            return getattr(self, 'get_%s' % field)(row[field])
-        return row[field]
-    
     def do_line(self, row):
         model_args = {field: self.field(field, row) for field in self.fields_retrieve}
         try:
@@ -69,7 +64,6 @@ class Command(BaseCommand):
         for field in obj.fields():
             if field.name in row and self.test(row[field.name]) and field.name not in self.fields_forbidden:
                 model_fields[field.name] = row[field.name]
-
         self.model.objects.filter(pk=obj.pk).update(**model_fields)
                 
     

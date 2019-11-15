@@ -42,6 +42,7 @@ class BaseView(PermissionRequiredMixin):
     def get_options(self):
         return {
             'guardian': guardian,
+            'debug': settings.DEBUG,
         }
 
     def get_header(self):
