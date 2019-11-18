@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.apps import apps
 from mighty.functions import test, boolean_input, make_float, make_int, get_or_none, make_searchable
-import os.path, csv, sys, logging, re, time
+import os.path, csv, sys, logging, re, time, uuid
 
 now = time.strftime("%Y%m%d")
 
@@ -45,6 +45,15 @@ class BaseCommand(BaseCommand):
 
     def make_searchable(self, input_str):
         return make_searchable(input_str)
+
+    def make_string(self, input_str):
+        if (',' in input_str):
+            print(input_str)
+            input_str = re.sub(r'[^\w\s]',' ',input_str).strip()
+            print(input_str)
+            return input_str
+        return re.sub(r'[^\w\s]',' ', input_str).strip()
+
 
     def test(self, data):
         return test(data)
@@ -96,4 +105,4 @@ class BaseCommand(BaseCommand):
         sfield = self.fields_associates[field] if field in self.fields_associates else field
         if hasattr(self, 'get_%s' % field):
             return getattr(self, 'get_%s' % field)(row[sfield])
-        return row[sfield]
+        return row[sfield] if self.test(row[sfield]) else None

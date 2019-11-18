@@ -128,6 +128,9 @@ class Graph(ModelFull):
         verbose_name = _.v_graph
         verbose_name_plural = _.vp_graph
 
+    def __str__(self):
+        return self.title
+
     @property
     def get_svg_container(self):
         return Template(self.svg_container).render(Context({'object': self,}))

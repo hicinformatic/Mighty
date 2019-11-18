@@ -1,11 +1,11 @@
 from django.core.management.base import CommandError
 from os.path import isfile
-import csv, uuid
+import csv
 
 from mighty.management import BaseCommand
 
 class Command(BaseCommand):
-    fields_forbidden = ['id',]
+    fields_forbidden = ['id', 'display']
     fields_retrieve = ['uid',]
     fields_associates = {}
     total_rows = 0
@@ -63,7 +63,9 @@ class Command(BaseCommand):
         model_fields = {}
         for field in obj.fields():
             if field.name in row and self.test(row[field.name]) and field.name not in self.fields_forbidden:
-                model_fields[field.name] = row[field.name]
-        self.model.objects.filter(pk=obj.pk).update(**model_fields)
+                setattr(obj, field.name, self.field(field.name, row))
+        obj.save()
+        #        model_fields[field.name] = self.field(field.name, row)
+        #self.model.objects.filter(pk=obj.pk).update(**model_fields)
                 
     

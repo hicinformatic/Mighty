@@ -11,7 +11,7 @@ from mighty.apps.grapher import filters, fields
 class GraphView(DetailView):
     no_permission = True
     fields = fields.graph
-    template_name = 'mighty/graph.html'
+    template_name = 'mighty/grapher/graph.html'
     backend = None
 
     def get_header(self):

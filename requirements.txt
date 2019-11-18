@@ -3,3 +3,4 @@ matplotlib
 pillow
 pycrypto
 django-jsonfield
+django-json-widget

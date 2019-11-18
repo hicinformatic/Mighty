@@ -4,7 +4,7 @@ from django.utils.html import format_html
 
 from mighty import fields, _
 from mighty.models import JSONField
-from mighty.functions import make_searchable, image_directory_path
+from mighty.functions import make_searchable, image_directory_path, test
 
 from urllib.parse import quote_plus
 from uuid import uuid4
@@ -160,7 +160,7 @@ class ModelDisplay(models.Model):
         abstract = True
 
     def set_display(self):
-        if self.display is None:
+        if self.display is None and test(self.__str__()):
             self.display = str(self.__str__())
 
     def save(self, *args, **kwargs):
@@ -325,7 +325,17 @@ class ModelPermissions(models.Model):
             PERM_ASKFORPERM,
         )
     
-class ModelFull(ModelUid, ModelBase, ModelDisable, ModelError, ModelAlert, ModelToSearch, ModelSignHash, ModelImage, ModelDisplay, ModelPermissions):
+class ModelFull(
+    ModelUid,
+    ModelBase,
+    ModelDisable, 
+    ModelError,
+    ModelAlert,
+    ModelToSearch,
+    ModelSignHash,
+    ModelImage,
+    ModelDisplay,
+    ModelPermissions):
     class Meta(ModelPermissions.Meta):
         abstract = True
 

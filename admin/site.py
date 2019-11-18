@@ -11,9 +11,11 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth import REDIRECT_FIELD_NAME, get_permission_codename
 from django.contrib.auth.views import LoginView
 from django.contrib.admin.forms import AdminAuthenticationForm
+from django_json_widget.widgets import JSONEditorWidget
 
 from functools import update_wrapper
 
+from mighty.models import JSONField
 from mighty.actions import enable_selected, disable_selected
 from mighty import  _
 from mighty import fields
@@ -52,6 +54,10 @@ class OverAdmin(admin.ModelAdmin):
     readonly_fields = fields.full
     search_fields = fields.search_fields
     save_on_top = True
+    formfield_overrides = {
+        JSONField: {'widget': JSONEditorWidget},
+    }
+
 
     def has_enable_permission(self, request, obj=None):
         opts = self.opts

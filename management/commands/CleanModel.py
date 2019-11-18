@@ -1,7 +1,6 @@
 from django.core.management.base import CommandError
 from django.apps import apps
 from os.path import isfile
-import csv, uuid
 
 from mighty.management import BaseCommand
 

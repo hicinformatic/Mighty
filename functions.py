@@ -6,6 +6,7 @@ import base64, datetime, string, random, unicodedata, re
 BS = MightyConfig.Crypto.BS
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
 unpad = lambda s : s[:-ord(s[len(s)-1:])]
+numeric_const_pattern = '[-+]? (?: (?: \d* [\.,] \d+ ) | (?: \d+ [\.,]? ) )(?: [Ee] [+-]? \d+ ) ?'
 
 def test(input_str=None):
     return True if str(input_str).strip().lower().replace(' ', '') not in MightyConfig.Test.search else False
@@ -21,16 +22,17 @@ def randomcode(stringLength):
     return ''.join(random.choice(letters).upper() for i in range(stringLength))
 
 def make_float(flt):
-    flt = str(flt).strip().replace(u'\xa0', u' ')
-    for s in MightyConfig.intflt_toreplace:
-        flt = flt.replate(s, '')
+    flt = re.compile(numeric_const_pattern, re.VERBOSE).search(flt).group().replace(',', '.')
+    #flt = str(flt).strip().replace(u'\xa0', u' ')
+    #for s in MightyConfig.intflt_toreplace:
+    #    flt = flt.replate(s, '')
     return float(flt)
 
 def make_int(itg):
-    itg = str(itg).strip().replace(u'\xa0', u' ')
-    for s in MightyConfig.intflt_toreplace:
-        itg = itg.replate(s, '')
-    return int(itg)
+    #itg = str(itg).strip().replace(u'\xa0', u' ')
+    #for s in MightyConfig.intflt_toreplace:
+    #    itg = itg.replate(s, '')
+    return int(make_float(itg))
 
 def encrypt(key, raw):
     raw = pad(raw)

@@ -1,38 +1,59 @@
 template = (
     'name',
     'graphtype',
+)
+template_options = (
+    'options',
+    'responsive_options',
+)
+
+template_lg = (
     'lg_width',
     'lg_height',
     'lg_max_width',
     'lg_title_size',
     'lg_text_size',
+)
+
+template_md = (
     'md_width',
     'md_height',
     'md_max_width',
     'md_title_size',
     'md_text_size',
+)
+
+template_sm = (
     'sm_width',
     'sm_height',
     'sm_max_width',
     'sm_title_size',
     'sm_text_size',
-    'options',
-    'responsive_options',
 )
 
 graph = (
     'title',
     'is_responsive',
     'templates',
+
+)
+
+graph_options =(
     'svg_container',
     'canvas_container', 
     'options',
     'responsive_options',
+)
+
+graph_size = (
     'width',
     'height',
     'max_width',
     'title_size',
     'text_size',
+)
+
+graph_data = (
     'bar_values',
     'bipolar_values',
     'funnel_values',
