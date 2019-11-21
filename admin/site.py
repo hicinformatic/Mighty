@@ -430,3 +430,6 @@ class AdminSite(admin.AdminSite):
         }
         request.current_app = self.name
         return LoginView.as_view(**defaults)(request)
+
+class FileInlineAdmin(admin.TabularInline):
+    fields = ('the_file', 'mimetype')

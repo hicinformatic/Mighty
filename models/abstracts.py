@@ -4,7 +4,7 @@ from django.utils.html import format_html
 
 from mighty import fields, _
 from mighty.models import JSONField
-from mighty.functions import make_searchable, image_directory_path, test
+from mighty.functions import make_searchable, image_directory_path, file_directory_path, test
 
 from urllib.parse import quote_plus
 from uuid import uuid4
@@ -352,3 +352,13 @@ class ModelSource(models.Model):
     def delete_source(self, field, save=False):
         del self.source[field]
         if save: self.save()
+
+class ModelFile(ModelBase, ModelUid):
+    the_file = models.FileField(upload_to=file_directory_path)
+    mimetype = models.CharField('Mime Type', max_length=255, blank=True, null=True)
+    
+    class Meta(ModelBase.Meta):
+        abstract = True
+
+    def get_mime_type(self):
+        return mimetypes.guess_type()[1]

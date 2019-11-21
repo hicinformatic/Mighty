@@ -68,6 +68,12 @@ def image_directory_path(instance, filename):
     else:
         return "{0}/{1}/{2}/{3}.{4}".format(directory, date.year, date.month, instance.id, ext)
 
+def file_directory_path(instance, filename):
+    directory = str(instance.__class__.__name__).lower()
+    date = datetime.datetime.now()
+    ext = filename.split('.')[-1:]
+    return "{0}/{1}/{2}/{3}".format(directory, date.year, date.month, filename)
+
 def similar_str(str1, str2):
     max_len = tmp = pos1 = pos2 = 0
     len1, len2 = len(str1), len(str2)
