@@ -10,8 +10,6 @@ from django.core.exceptions import PermissionDenied
 from django.urls import path, include
 
 from copy import deepcopy
-
-
 from mighty.functions import logger
 from mighty import _
 
