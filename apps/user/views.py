@@ -5,6 +5,7 @@ from mighty.apps.user import filters
 
 class UserMe(DetailView):
     fields = ('last_name', 'first_name', 'email', 'phone', 'gender',)
+    no_permission = True
 
     def get_header(self):
         return {'title': 'me',}
