@@ -29,3 +29,8 @@ notsignhash = (
     'alerts',
     'errors',
 )
+
+file_fields = (
+    'the_file',
+    'mime_type',
+)
