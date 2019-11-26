@@ -9,6 +9,7 @@ from mighty.functions import make_searchable, image_directory_path, file_directo
 from urllib.parse import quote_plus
 from uuid import uuid4
 from hashlib import sha256
+import os
 
 PERM_ADD = 'add'
 PERM_DETAIL = 'detail'
@@ -362,3 +363,15 @@ class ModelFile(ModelBase, ModelUid):
 
     def get_mime_type(self):
         return mimetypes.guess_type()[1]
+
+    @property
+    def filename(self):
+        return os.path.basename(self.the_file.name)
+
+    @property
+    def fonta(self):
+        return "alt"
+
+    @property
+    def url(self):
+        return self.the_file.url

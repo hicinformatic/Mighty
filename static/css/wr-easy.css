@@ -7058,7 +7058,7 @@ input[type="checkbox"].sm-dsc:not(:checked) ~ * { display: none; }
 }
 
 /* Media Queries lg */
-@media (min-width: 1200px) {
+@media (min-width: 1200.1px) {
 input[type="checkbox"].olg-dsc:not(:checked) ~ * { display: none; }
 .olg-al-stretch, .olg-al-stretch-ch > *, .olg-al-stretch-rs * { align-items: stretch; }
 .olg-al-center, .olg-al-center-ch > *, .olg-al-center-rs * { align-items: center; }
@@ -8819,7 +8819,7 @@ input[type="checkbox"].olg-dsc:not(:checked) ~ * { display: none; }
 }
 
 /* Media Queries md */
-@media (min-width: 992px) {
+@media (min-width: 992.1px) {
 input[type="checkbox"].omd-dsc:not(:checked) ~ * { display: none; }
 .omd-al-stretch, .omd-al-stretch-ch > *, .omd-al-stretch-rs * { align-items: stretch; }
 .omd-al-center, .omd-al-center-ch > *, .omd-al-center-rs * { align-items: center; }
@@ -10580,7 +10580,7 @@ input[type="checkbox"].omd-dsc:not(:checked) ~ * { display: none; }
 }
 
 /* Media Queries sm */
-@media (min-width: 768px) {
+@media (min-width: 768.1px) {
 input[type="checkbox"].osm-dsc:not(:checked) ~ * { display: none; }
 .osm-al-stretch, .osm-al-stretch-ch > *, .osm-al-stretch-rs * { align-items: stretch; }
 .osm-al-center, .osm-al-center-ch > *, .osm-al-center-rs * { align-items: center; }

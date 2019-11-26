@@ -141,6 +141,8 @@ class BaseView(PermissionRequiredMixin):
             'view': self.__class__.__name__,
             'translate': self.get_translate(),
         })
+        if hasattr(self, "add_to_context"):
+            context.update(self.add_to_context)
         context.update(self.get_permissions())
         if hasattr(self, "model"):
             context.update({'meta': self.model._meta})
@@ -223,6 +225,7 @@ class ViewSet(object):
     change_fields = None
     detail_fields = None
     form_fields = None
+    add_to_context = None
 
     def __init__(self):
         self.views = deepcopy(self.views)
@@ -231,24 +234,18 @@ class ViewSet(object):
   
     def view(self, view, *args, **kwargs):
         View = type(view, (self.views[view]['view'],), {})
-
-        for k, v in kwargs.items():
-            setattr(View, k, v)
-
-        if not hasattr(View, "no_permission") or not View.no_permission:
-            View.permission_required = (self.model().perm(view),)
         View.model = self.model
         View.fields = self.fields
+        for k, v in kwargs.items(): setattr(View, k, v)
+        if not hasattr(View, "no_permission") or not View.no_permission: View.permission_required = (self.model().perm(view),)
+        if self.add_to_context: View.add_to_context = self.add_to_context
+        if view == 'add': View.fields = self.fields if self.add_fields is None else self.add_fields
+        if view == 'change': View.fields = self.fields if self.change_fields is None else self.change_fields
+        if view == 'detail': View.fields = self.fields if self.detail_fields is None else self.detail_fields
         if view == 'list':
             View.list_display = self.list_display
             if self.filter_model is not None:
                 View.filter_model = self.filter_model
-        if view == 'add':
-            View.fields = self.fields if self.add_fields is None else self.add_fields
-        if view == 'change':
-            View.fields = self.fields if self.change_fields is None else self.change_fields
-        if view == 'detail':
-            View.fields = self.fields if self.detail_fields is None else self.detail_fields
 
         return View
 
