@@ -433,3 +433,4 @@ class AdminSite(admin.AdminSite):
 
 class FileInlineAdmin(admin.TabularInline):
     fields = ('the_file', 'mimetype')
+    extra = 1

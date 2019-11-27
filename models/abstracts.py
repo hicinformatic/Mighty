@@ -325,20 +325,6 @@ class ModelPermissions(models.Model):
             PERM_ADMINPERM,
             PERM_ASKFORPERM,
         )
-    
-class ModelFull(
-    ModelUid,
-    ModelBase,
-    ModelDisable, 
-    ModelError,
-    ModelAlert,
-    ModelToSearch,
-    ModelSignHash,
-    ModelImage,
-    ModelDisplay,
-    ModelPermissions):
-    class Meta(ModelPermissions.Meta):
-        abstract = True
 
 class ModelSource(models.Model):
     sources = JSONField(_.f_sources, blank=True, null=True)
@@ -375,3 +361,17 @@ class ModelFile(ModelBase, ModelUid):
     @property
     def url(self):
         return self.the_file.url
+
+class ModelFull(
+    ModelUid,
+    ModelBase,
+    ModelDisable,
+    ModelError,
+    ModelAlert,
+    ModelToSearch,
+    ModelSignHash,
+    ModelImage,
+    ModelDisplay,
+    ModelPermissions):
+    class Meta(ModelPermissions.Meta):
+        abstract = True

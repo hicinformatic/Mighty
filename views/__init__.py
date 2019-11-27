@@ -123,9 +123,11 @@ class BaseView(PermissionRequiredMixin):
 
     def get_translate(self):
         return {
-            "logout": "Déconnexion",
-            "login": "Connexion",
-            "admin": "Administration",
+            "logout": _.v_logout,
+            "login": _.v_login,
+            "admin": _.v_admin,
+            "admin_view": _.v_admin_view,
+            "clear": _.v_clear,
         }
 
     def get_context_data(self, **kwargs):
