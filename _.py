@@ -69,6 +69,6 @@ tpl_admin_view = _("Access to the administrator view")
 
 v_login = _("Connexion")
 v_logout = _("Déconnexion")
-v_admin = _("Administration")
+v_admin = _("Admin")
 v_admin_view = _("Vue d'administration")
 v_clear = _("Effacer")
