@@ -1,5 +1,6 @@
-function Mcommon(id, url, options={}) {
-    Mconfig.call(this, id, url, options);
+function Mcommon(url, options={}) {
+    //Mconfig.call(this, id, url, options);
+    Mconfig.call(this, url, options);
 
     this.randdarkcolor = function() {
         var lum = -0.25;
@@ -33,27 +34,38 @@ function Mcommon(id, url, options={}) {
     }
 
     this.xhr = function(config) {
+        this.protect(config);
         var self = this;
         var url = this.config[config].hasOwnProperty("url") ? this.config[config]["url"] : this.url;
         var datas = this.config[config].hasOwnProperty("datas") ? this.config[config]["datas"] : '';
         var method = this.config[config].hasOwnProperty("method") ? this.config[config]["method"] : this.method;
         var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
         xhttp.timeout = this.config[config].hasOwnProperty("method") ? this.config[config]["timeout"] : this.timeout;
-        xhttp.responseType = this.config[config].hasOwnProperty("datatype") ? this.config[config]["datatype"] : this.datatype;;
+        xhttp.responseType = this.config[config].hasOwnProperty("datatype") ? this.config[config]["datatype"] : this.datatype;
         xhttp.onprogress = function () {
             self.log("log", `onprogress - url: ${url}, method: ${method}, config: ${config}`);
         };
         xhttp.onload = function (e) {
-            self.log("log", `onprogress - url: ${url}, method: ${method}, config: ${config}`, xhttp.response);
+            self.log("log", `onload - url: ${url}, method: ${method}, config: ${config}`, xhttp.response);
         };
         xhttp.onabort = function (e) {
+            this.protect(config, false);
             self.log("error", `onabort - url: ${url}, method: ${method}, config: ${config}`, e);
         };
         xhttp.onerror = function (e) {
+            this.protect(config, false);
             self.log("error", `onerror - url: ${url}, method: ${method}, config: ${config}`, e);
         };
         xhttp.open(method, url, true);
         xhttp.send(datas);
+    }
+
+    this.protect = function(config, status=true){
+        if (status) {
+            document.getElementById(config).innerHTML = "ko";
+        }else{
+            document.getElementById(config).innerHTML = "ok";
+        }
     }
 
     this.process = function() {

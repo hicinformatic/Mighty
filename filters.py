@@ -22,6 +22,7 @@ class Filter(object):
         self.filters = {}
         self.select_related = []
         self.prefetch_related = []
+        self.nparams = {}
         self.params = {
             "searchex": {
                 "param": "searchex",
@@ -59,28 +60,34 @@ class Filter(object):
         }
 
     def operators(self, param):
-        return self.params[param]["operators"]
+        return self.params[param]["operators"] if param in self.params else self.nparams[param]["operators"]
     
     def category(self, param):
-        return self.params[param]["category"]
+        return self.params[param]["category"] if param in self.params else self.nparams[param]["category"]
 
     def separator(self, param, key="_"):
-        return self.params[param]["%sseparator" % key]
+        return self.params[param]["%sseparator" % key] if param in self.params else self.nparams[param]["%sseparator" % key]
 
     def fields(self, param):
-        return self.params[param]["fields"]
+        return self.params[param]["fields"] if param in self.params else self.nparams[param]["fields"]
 
     def mask(self,param):
-        return self.params[param]["mask"]
+        return self.params[param]["mask"] if param in self.params else self.nparams[param]["mask"]
 
     def marker(self,param):
-        return self.params[param]["marker"]
+        return self.params[param]["marker"] if param in self.params else self.nparams[param]["marker"]
 
     def param(self, param):
-        return self.params[param]["param"]
+        return self.params[param]["param"] if param in self.params else self.nparams[param]["param"]
+    
+    def add_param(self, param, mask="icontains"):
+        self.nparams[param] = {'param': param, 'mask': mask, 'fields': {}, **self.config}
 
     def add(self, param, field, exact=False, *args, **kwargs):  
-        self.params[param]["fields"][field] = kwargs
+        if param in self.params:
+            self.params[param]["fields"][field] = kwargs
+        elif param in self.nparams:
+            self.nparams[param]["fields"][field] = kwargs
 
     def distinct(self):
         distinct_param = self.request.GET.get(self.param("distinct"))
@@ -117,8 +124,8 @@ class Filter(object):
             return ~Q(**{field: make_searchable(value)}) if negative else Q(**{field: make_searchable(value)})
         return ~Q(**{field: value}) if negative else Q(**{field: value})
 
-    def get_S(self, search, ex=False):
-        psearch = "searchex" if ex else "search"
+    def get_S(self, search, param="search"):
+        psearch = param
         for field, args in self.fields(psearch).items():
             field = "{field}__{mask}".format(field=field, mask=args["mask"] if "mask" in args else self.mask(psearch))
             try:
@@ -127,15 +134,15 @@ class Filter(object):
                 the_Q = self.get_Q(field, search, negative=field["negative"] if "mask" in field else False)
         return the_Q
 
-    def search(self, ex=False, *args, **kwargs):
-        psearch = "searchex" if ex else "search"
+    def search(self, param="search", *args, **kwargs):
+        psearch = param
         search_param = self.request.GET.get(self.param(psearch))
         if test(search_param):
             search_param = search_param.split(self.separator(psearch))
-            the_Q = self.get_S(search_param[0], ex)
+            the_Q = self.get_S(search_param[0], param)
             if len(search_param) > 1:
                 for search in search_param[1:]:
-                    the_Q.add(self.get_S(search), kwargs["operator"] if "operator" in kwargs else Q.AND)
+                    the_Q.add(self.get_S(search, param), kwargs["operator"] if "operator" in kwargs else Q.AND)
             return the_Q
         return None
 
@@ -200,8 +207,12 @@ class Filter(object):
         qS = self.search()
         if qS: q.add(qS, Q.AND)
         
-        qSe = self.search(True)
+        qSe = self.search("searchex")
         if qSe: q.add(qSe, Q.AND)
+
+        for param in self.nparams:
+            qSn = self.search(param)
+            if qSn: q.add(qSn, Q.AND)
 
         qF = self.filter()
         if qF: q.add(qF, Q.AND)

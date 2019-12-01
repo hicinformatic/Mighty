@@ -1,5 +1,5 @@
-function Mconfig(id, url, options={}) {
-    this.id = id;
+function Mconfig(url, options={}) {
+    //this.id = id;
     this.url = url;
     this.options = options;
 
