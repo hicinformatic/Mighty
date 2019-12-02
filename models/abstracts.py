@@ -343,6 +343,7 @@ class ModelSource(models.Model):
 class ModelFile(ModelBase, ModelUid):
     the_file = models.FileField(upload_to=file_directory_path)
     mimetype = models.CharField('Mime Type', max_length=255, blank=True, null=True)
+    name = models.CharField('Name', max_length=255, blank=True, null=True)
     
     class Meta(ModelBase.Meta):
         abstract = True

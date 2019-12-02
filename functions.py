@@ -52,6 +52,22 @@ def boolean_input(question, default='n'):
         result = input("Please answer yes(y) or no(n), default(%s): " % default)
     return result[0].lower() == 'y'
 
+def boolean_input(question, default='n'):
+    result = input("%s " % question)
+    while len(result) < 1 or result[0].lower() not in "yn":
+        result = input("Please answer yes(y) or no(n), default(%s): " % default)
+    return result[0].lower() == 'y'
+
+def multipleobjects_onechoice(objects_list, reference):
+    objects = [None, ]
+    i = 0
+    for obj in objects_list:
+        i += 1
+        objects.append(obj)
+        print("%s. %s" % (i, str(obj)))
+    result = input("choose the object that refers to %s (keep empty for pass): " % reference)
+    return objects[make_int(result)] if test(result) else None
+    
 def make_searchable(input_str):
     for i in MightyConfig.Test.replace:
         input_str = input_str.replace(i, ' ')

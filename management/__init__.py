@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.apps import apps
-from mighty.functions import test, boolean_input, make_float, make_int, get_or_none, make_searchable
+from mighty.functions import test, boolean_input, make_float, make_int, get_or_none, make_searchable, multipleobjects_onechoice
 import os.path, csv, sys, logging, re, time, uuid
 
 now = time.strftime("%Y%m%d")
@@ -31,6 +31,9 @@ class BaseCommand(BaseCommand):
     def boolean_input(self, question, default='n'):
         return boolean_input(question, default)
 
+    def multipleobjects_onechoice(self, objects_list, reference):
+        return multipleobjects_onechoice(objects_list, reference)
+
     def get_or_none(self, data):
         return get_or_none(data)
 
@@ -48,12 +51,9 @@ class BaseCommand(BaseCommand):
 
     def make_string(self, input_str):
         if (',' in input_str):
-            print(input_str)
             input_str = re.sub(r'[^\w\s]',' ',input_str).strip()
-            print(input_str)
             return input_str
         return re.sub(r'[^\w\s]',' ', input_str).strip()
-
 
     def test(self, data):
         return test(data)
@@ -76,11 +76,13 @@ class BaseCommand(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--progressbar', default=False)
         parser.add_argument('--logfile', default="%s_%s.log" % (str(self.subcommand).lower(), now))
+        parser.add_argument('--encoding', default='utf8')
 
     def handle(self, *args, **options):
         self.startLog(options.get('verbosity'))
         self.error = Error(self.logger)
         self.pbar = options.get('progressbar')
+        self.encoding = options.get('encoding')
         self.get_model(options.get('label'), options.get('model'))
         self.do(options)
         self.get_errors(options.get('logfile'))

@@ -22,7 +22,6 @@ class Command(BaseCommand):
         parser.add_argument('--label', required=True)
         parser.add_argument('--model', required=True)
         parser.add_argument('--comma', default=',')
-        parser.add_argument('--encoding', default='utf8')
 
     def check_row(self, row):
         for field in self.fields_retrieve:
@@ -34,7 +33,6 @@ class Command(BaseCommand):
     def do(self, options):
         self.csv = options.get('csv')
         self.comma = options.get('comma')
-        self.encoding = options.get('encoding')
         if not isfile(self.csv): raise CommandError('CSV "%s" does not exist' % self.csv)
         with open(self.csv, encoding=self.encoding) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=self.comma)
