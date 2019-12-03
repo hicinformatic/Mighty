@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.apps import apps
-from mighty.functions import test, boolean_input, make_float, make_int, get_or_none, make_searchable, multipleobjects_onechoice
+from mighty.functions import test, boolean_input, make_float, make_int, get_or_none, make_searchable, multipleobjects_onechoice, object_search
 import os.path, csv, sys, logging, re, time, uuid
 
 now = time.strftime("%Y%m%d")
@@ -27,9 +27,19 @@ class BaseCommand(BaseCommand):
     help = 'Commande Base'
     logger = logging.getLogger('')
     error = Error
+    fields_forbidden = ['id', 'display']
+    fields_retrieve = ['uid',]
+    fields_associates = {}
+    fields_unique = []
+    reverse_associates = {}
+    source = {}
+    found = {}
 
     def boolean_input(self, question, default='n'):
         return boolean_input(question, default)
+
+    def object_search(self, model, reference):
+        return object_search(model, reference)
 
     def multipleobjects_onechoice(self, objects_list, reference):
         return multipleobjects_onechoice(objects_list, reference)

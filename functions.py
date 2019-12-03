@@ -58,15 +58,30 @@ def boolean_input(question, default='n'):
         result = input("Please answer yes(y) or no(n), default(%s): " % default)
     return result[0].lower() == 'y'
 
-def multipleobjects_onechoice(objects_list, reference):
+def object_search(model, reference):
+    result = input("Make a search that refers to %s (keep empty for pass): " % reference)
+    if test(result):
+        print(model)
+        objects_list = model.objects.filter(to_search__contains=make_searchable(result))
+        return multipleobjects_onechoice(objects_list, reference, model)
+    return None
+
+def multipleobjects_onechoice(objects_list, reference, model):
     objects = [None, ]
     i = 0
+    print("0. for search")
     for obj in objects_list:
         i += 1
         objects.append(obj)
         print("%s. %s" % (i, str(obj)))
     result = input("choose the object that refers to %s (keep empty for pass): " % reference)
-    return objects[make_int(result)] if test(result) else None
+    if test(result):
+        choice = make_int(result)
+        if choice == 0:
+            return object_search(model, reference)
+        else:
+            return objects[choice]
+    return None
     
 def make_searchable(input_str):
     for i in MightyConfig.Test.replace:
