@@ -23,21 +23,63 @@ function Mcommon(url, options={}) {
         }
     }
 
+    this.delay = function(config, ms) {
+        clearTimeout(this.timer[config]);
+        var self = this;
+        this.timer[config] = setTimeout(function() { self.xhr(config); }, ms || 0);
+    }
+
+    this.last = function(config, what, like=null) {
+        if (like === null) {
+            this.questions.lasts[config][what.key] = what.value;
+        } else {
+            return (this.questions.lasts[config].hasOwnProperty(what) && this.questions.lasts[config][what] === like) ? false : true;
+        }
+    }
+
+    this.i = function(what, i=0) {
+        if (this.questions.i.hasOwnProperty(what)) {
+            i = this.questions.i[what];
+        } else {
+            this.questions.i[what] = 0;
+        }
+        this.questions.i[what]++;
+        return i;
+    }
+
+    this.is = function(what, status=false, is=false) {
+        if (this.questions.is.hasOwnProperty(what) && this.questions.is[what]) {
+            is = this.questions.is[what];
+        } else {
+            this.questions.is[what] = status;
+        }
+        return is;
+    }
+
     this.add = function(config, key, value={}) {
         this.log("debug", `add - config: ${config}, key: ${key}`, config);
         if(!this.config.hasOwnProperty(config)) {
             this.questions.lasts[config] = {};
-            this.elements[config] = {};
+            //this.elements[config] = {};
             this.config[config] = {};
         } 
         this.config[config][key] = value;
+    }
+
+    this.serialize = function(datas) {
+        var str = [];
+        for (var p in datas)
+          if (datas.hasOwnProperty(p) && datas[p]) {
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(datas[p]));
+          }
+        return str.join("&");
     }
 
     this.xhr = function(config) {
         this.protect(config);
         var self = this;
         var url = this.config[config].hasOwnProperty("url") ? this.config[config]["url"] : this.url;
-        var datas = this.config[config].hasOwnProperty("datas") ? this.config[config]["datas"] : '';
+        var datas = this.config[config].hasOwnProperty("datas") ? this.serialize(this.config[config]["datas"]) : this.serialize(this.form);
         var method = this.config[config].hasOwnProperty("method") ? this.config[config]["method"] : this.method;
         var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
         xhttp.timeout = this.config[config].hasOwnProperty("method") ? this.config[config]["timeout"] : this.timeout;
@@ -47,31 +89,59 @@ function Mcommon(url, options={}) {
         };
         xhttp.onload = function (e) {
             self.log("log", `onload - url: ${url}, method: ${method}, config: ${config}`, xhttp.response);
+            self.template(config, xhttp.response);
         };
         xhttp.onabort = function (e) {
-            this.protect(config, false);
             self.log("error", `onabort - url: ${url}, method: ${method}, config: ${config}`, e);
+            self.protect(config, false);
         };
         xhttp.onerror = function (e) {
-            this.protect(config, false);
             self.log("error", `onerror - url: ${url}, method: ${method}, config: ${config}`, e);
+            self.protect(config, false);
         };
+        if (method=="GET" && datas) {
+            url = url + "?" + datas;
+        }
         xhttp.open(method, url, true);
         xhttp.send(datas);
     }
 
     this.protect = function(config, status=true){
         if (status) {
-            document.getElementById(config).innerHTML = "ko";
         }else{
-            document.getElementById(config).innerHTML = "ok";
         }
     }
 
-    this.process = function() {
+    this.process = function(ms=500) {
         for (config in this.config) {
-            this.xhr(config);
+            this.delay(config, ms);
+            //this.xhr(config);
         }
+    }
+
+    this.events = function() {
+        this.searchable(this.is("searchable"));
+    }
+
+    this.searchable = function(searchable, self=this) {
+        if (searchable) {
+            document.getElementById(searchable).addEventListener('keyup', function(e) {
+                self.form.search = this.value;
+                self.process(500);
+            });
+            this.form.search = document.getElementById(searchable).value;
+        }
+    }
+
+    this.template = function(config, response) {
+        var source = document.getElementById(`template-${config}`).innerHTML;
+        source = source.replace(/\[\[/g, '{{');
+        source = source.replace(/\]\]/g, '}}');
+        var template = Handlebars.compile(source);
+        var html = template({"datas": response[this.ajax.results]});
+        document.getElementById(config).innerHTML = html;
+        this.protect(config, false);
+
     }
 
 }

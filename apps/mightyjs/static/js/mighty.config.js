@@ -3,7 +3,8 @@ function Mconfig(url, options={}) {
     this.url = url;
     this.options = options;
 
-    this.elements = {commands: {},};
+    //this.elements = {commands: {},};
+    this.form = {search: null,};
     this.config = {};
     this.timer = {};
     this.questions = {i: {}, is: {}, lasts: {},};
