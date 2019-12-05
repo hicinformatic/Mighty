@@ -4,7 +4,7 @@
 <table class="table table-striped">
     <thead class="thead-dark">
         <tr>
-            {% for field in list_display %}
+            {% for field in fields %}
             <th>
             {% if forloop.first %}
                 {% if has_add_permission %}
@@ -27,7 +27,7 @@
     <tbody>
     {% for object in object_list %}
         <tr>
-            {% for field in list_display %}
+            {% for field in fields %}
             <td>
             {% if forloop.first %}
                 {% if has_detail_permission %}

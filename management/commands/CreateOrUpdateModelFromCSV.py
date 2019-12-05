@@ -1,23 +1,15 @@
 from django.core.management.base import CommandError
 from django.db.models import Q
+from django.core.exceptions import MultipleObjectsReturned
 from os.path import isfile
 import csv
 
 from mighty.management import BaseCommand
 
 class Command(BaseCommand):
-    total_rows = 0
-    current_row = 0
-
-    def create_parser(self, prog_name, subcommand, **kwargs):
-        self.subcommand = subcommand
-        return super().create_parser(prog_name, subcommand)
-
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument('--csv', required=True)
-        parser.add_argument('--label', required=True)
-        parser.add_argument('--model', required=True)
         parser.add_argument('--comma', default=',')
 
     def check_row(self, row):
@@ -51,36 +43,46 @@ class Command(BaseCommand):
                 self.current_row += 1
     
     def do_line(self, row):
-        model_args = {field: self.field(field, row) for field in self.fields_retrieve}
-        models_srch = Q()
-        for field in self.field("denomination", row).split(" "):
-            models_srch.add
+        obj = False
+        models_srch = False
+        models_args = {field: self.field(field, row) for field in self.fields_retrieve}
+        if self.test(self.search) and self.field(self.search, row):
+            for field in self.search.split(","):
+                for search in self.field(field, row).split(" "):
+                    if models_srch:
+                        models_srch = models_srch & Q(to_search__icontains=search)
+                    else:
+                        models_srch = Q(to_search__icontains=search)
 
-
-        models_srch = {"to_search": field for field in self.field("denomination", row).split(" ")}
-        print(models_srch)
         try:
-            obj = self.model.objects.get(Q(**model_args) | Q(**models_srch))
+            obj = self.model.objects.get(Q(**models_args) | models_srch) if models_srch else self.model.objects.get(Q(**models_args))
+            update = True
         except self.model.DoesNotExist:
-            if row["Société"] not in self.found:
-                obj = self.object_search(self.model, row["Société"])
-                if obj is None:
-                    obj = self.model(**model_args)
-                    obj.save()
+            if self.create:
+                sobj = self.field(self.search, row)
+                if sobj not in self.found:
+                    if self.myself:
+                        obj = self.object_search(self.model, sobj)
+                        if obj:
+                            self.found[sobj] = obj
+                            update = True
+                    elif self.test(models_args):
+                        obj = self.model(**models_args)
+                        obj.save()
+                        update = True
                 else:
-                    self.found[row["Société"]] = obj
-            elif row["Société"] not in self.found:
-                obj = self.found[row["Société"]]
-        
-        #model_fields = {}
-        #for field in obj.fields():
-        #    if field.name not in self.fields_forbidden:
-        #        if field.name in row and self.test(row[field.name]):
-        #            setattr(obj, field.name, self.field(field.name, row))
-        #        elif self.reverse_associates[field.name] in row and self.test(row[self.reverse_associates[field.name]]):
-        #            setattr(obj, field.name, self.field(field.name, row))
-        #obj.save()
-        #        model_fields[field.name] = self.field(field.name, row)
-        #self.model.objects.filter(pk=obj.pk).update(**model_fields)
-                
-    
+                    obj = self.found[sobj]
+                    update = True
+        except MultipleObjectsReturned:
+            objects_list = self.model.objects.filter(Q(**models_args) | models_srch) if models_srch else self.model.objects.get(Q(**models_args))
+            obj = self.multipleobjects_onechoice(objects_list, str(models_args), self.model)
+            update = True if obj else False
+            
+        if update:
+            model_fields = {}
+            for field in obj.fields(['ManyToOneRel',]):
+                if field.name not in self.fields_forbidden:
+                    sfield = self.field(field.name, row)
+                    if sfield :
+                        setattr(obj, field.name, sfield)
+            obj.save()    

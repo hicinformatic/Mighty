@@ -41,8 +41,8 @@ method_email = _("Email")
 method_sms = _("SMS")
 method_basic = _("Mot de passe")
 
-t_authenticate = _("On se connait déjà?")
-t_login = _("Â bientôt")
+t_login = _("On se connait déjà?")
+t_logout = _("Â bientôt")
 
 v_sms = _('SMS')
 v_email = _('Email')

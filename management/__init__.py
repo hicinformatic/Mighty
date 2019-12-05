@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.apps import apps
-from mighty.functions import test, boolean_input, make_float, make_int, get_or_none, make_searchable, multipleobjects_onechoice, object_search
+from django.utils.six.moves import input
+from mighty import functions
 import os.path, csv, sys, logging, re, time, uuid
 
 now = time.strftime("%Y%m%d")
@@ -31,43 +31,56 @@ class BaseCommand(BaseCommand):
     fields_retrieve = ['uid',]
     fields_associates = {}
     fields_unique = []
+    foreignkey = {}
     reverse_associates = {}
     source = {}
     found = {}
+    total_rows = 0
+    current_row = 0
+
+    def get_model(self, label, model):
+        return functions.get_model(label, model)
+
+    def input_get_model(self, reference):
+        return functions.input_get_model(reference)
 
     def boolean_input(self, question, default='n'):
-        return boolean_input(question, default)
+        return functions.boolean_input(question, default)
 
     def object_search(self, model, reference):
-        return object_search(model, reference)
+        return functions.object_search(model, reference)
 
-    def multipleobjects_onechoice(self, objects_list, reference):
-        return multipleobjects_onechoice(objects_list, reference)
+    def multipleobjects_onechoice(self, objects_list, reference, model):
+        return functions.multipleobjects_onechoice(objects_list, reference, model)
 
     def get_or_none(self, data):
-        return get_or_none(data)
+        return functions.get_or_none(data)
 
     def get_uid(self, uid):
         return uuid.UUID('{%s}' % uid)
 
     def make_float(self, flt):
-        return make_float(flt)
+        return functions.make_float(flt)
 
     def make_int(self, itg):
-        return make_int(itg)
+        return functions.make_int(itg)
 
     def make_searchable(self, input_str):
-        return make_searchable(input_str)
+        return functions.make_searchable(input_str)
 
     def make_string(self, input_str):
-        if (',' in input_str):
-            input_str = re.sub(r'[^\w\s]',' ',input_str).strip()
-            return input_str
-        return re.sub(r'[^\w\s]',' ', input_str).strip()
+        return functions.make_string(input_str)
 
     def test(self, data):
-        return test(data)
-    
+        return functions.test(data)
+
+    def foreignkey_from(self, model, field, data, ret):
+        return functions.foreignkey_from(model, field, data, ret)
+
+    def create_parser(self, prog_name, subcommand, **kwargs):
+        self.subcommand = subcommand
+        return super().create_parser(prog_name, subcommand)
+
     def progressBar(self, value, endvalue, bar_length=20):
         percent = float(value) / endvalue
         arrow = '-' * int(round(percent * bar_length)-1) + '>'
@@ -83,38 +96,82 @@ class BaseCommand(BaseCommand):
         self.logger.addHandler(logging.StreamHandler(self.stdout))
         self.logger.info('--- Start ---')
 
+    def get_fk_from(self, fields):
+        for field in fields.split(','):
+            self.foreignkey[field] = {
+                'model': self.input_get_model(field), 
+                'field': input("What field to use for the reference %s: " % field),
+                'data': input("What field data to use for the reference %s: " % field),
+                'return': input("What field return to use for the reference %s: " % field)
+            }
+            self.logger.info('Model use for field %s: %s' % (field, self.foreignkey[field]))
+
     def add_arguments(self, parser):
-        parser.add_argument('--progressbar', default=False)
         parser.add_argument('--logfile', default="%s_%s.log" % (str(self.subcommand).lower(), now))
+        parser.add_argument('--progressbar', action="store_true")
+        parser.add_argument('--create', action="store_true")
+        parser.add_argument('--myself', action="store_true")
+        parser.add_argument('--label', required=True)
+        parser.add_argument('--model', required=True)
+        parser.add_argument('--search', default=None)
+        parser.add_argument('--retrieve', default=None)
+        parser.add_argument('--forbidden', default=None)
+        parser.add_argument('--foreignkey', default=None)
         parser.add_argument('--encoding', default='utf8')
 
     def handle(self, *args, **options):
-        self.startLog(options.get('verbosity'))
         self.error = Error(self.logger)
+        self.search = options.get('search')
+        self.create = options.get('create')
+        self.myself = options.get('myself')
+        retrieve = options.get('retrieve')
+        if retrieve: self.fields_retrieve = [field for field in retrieve.split(",")]
+        forbidden = options.get('forbidden')
+        if forbidden: self.fields_forbidden = [field for field in forbidden.split(",")]
         self.pbar = options.get('progressbar')
+        self.startLog(options.get('verbosity'))
         self.encoding = options.get('encoding')
-        self.get_model(options.get('label'), options.get('model'))
+        self.model = self.get_model(options.get('label'), options.get('model'))
+        self.before(options)
+        self.get_fk_from(options.get('foreignkey'))
         self.do(options)
-        self.get_errors(options.get('logfile'))
+        self.after(options)
+        self.errors_in_logfile(options.get('logfile'))
         self.logger.info('--- End ---')
 
-    def get_model(self, label, model):
-        self.model = apps.get_model(label, model)
+    def before(self, options):
+        pass
 
     def do(self, options):
         self.logger.info('--- Doing ---')
 
-    def get_errors(self, logfile):
-        f = open(logfile, "w")
-        for key, errors in self.error.errors.items():
-            f.write("==== Field in error: %s (errors: %s)====\n" % (key, len(errors)))
-            for error in errors:
-                f.write("%s\n" % error)
+    def after(self, options):
+        pass
+
+    def errors_in_logfile(self, logfile):
+        with open(logfile, "w") as f:
+            for key, errors in self.error.errors.items():
+                f.write("==== Field in error: %s (errors: %s)====\n" % (key, len(errors)))
+                for error in errors:
+                   f.write("%s\n" % error)
         f.close()
         self.logger.info('Errors: %s' % self.error.count)
 
     def field(self, field, row):
+        #sfield = self.fields_associates[field] if field in self.fields_associates else field
+        #if hasattr(self, 'get_%s' % field):
+        #    return getattr(self, 'get_%s' % field)(row[sfield])
+        #return row[sfield] if self.test(row[sfield]) else None
         sfield = self.fields_associates[field] if field in self.fields_associates else field
         if hasattr(self, 'get_%s' % field):
             return getattr(self, 'get_%s' % field)(row[sfield])
-        return row[sfield] if self.test(row[sfield]) else None
+        elif sfield in row and self.test(row[sfield]):
+            if sfield in self.foreignkey:
+                return self.foreignkey_from(
+                    self.foreignkey[sfield]['model'],
+                    self.foreignkey[sfield]['field'],
+                    row[self.foreignkey[sfield]['data']],
+                    self.foreignkey[sfield]['return']
+                )
+            return row[sfield]
+        return None

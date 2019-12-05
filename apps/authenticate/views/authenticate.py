@@ -39,32 +39,23 @@ class Login(FormView):
     permission_required = ()
     user = None
     method = None
+    add_to_context = {
+        'title': _.t_login,
+        "enable_email": AuthenticateConfig.method.email,
+        "enable_sms": AuthenticateConfig.method.sms,
+        "enable_basic": AuthenticateConfig.method.basic,
+        "send_method": _.send_method,
+        "send_basic": _.send_basic,
+        "method_sms": _.method_sms,
+        "method_email": _.method_email,
+        "method_basic": _.method_basic,
+    }
 
     def form_valid(self, form):
         self.user = form.user_cache
         self.method = form.method_cache
         self.success_url = form.success_url
         return super(Login, self).form_valid(form)
-
-    def get_header(self):
-        return {
-            'title': _.t_authenticate
-        }
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            "enable_email": AuthenticateConfig.method.email,
-            "enable_sms": AuthenticateConfig.method.sms,
-            "enable_basic": AuthenticateConfig.method.basic,
-            "send_method": _.send_method,
-            "send_basic": _.send_basic,
-            "method_sms": _.method_sms,
-            "method_email": _.method_email,
-            "method_basic": _.method_basic,
-
-        })
-        return context
 
     def get_success_url(self):
         return self.success_url
@@ -74,46 +65,25 @@ class LoginView(BaseView, LoginView):
     model_name = 'authenticate'
     form_class = AuthenticateTwoFactorForm
 
-    def get_header(self):
-        return {'title': _.t_authenticate}
-
     def get_form_kwargs(self):
         kwargs = super(LoginView, self).get_form_kwargs()
         useruidandmethod = decrypt(settings.SECRET_KEY[:16], unquote_plus(self.kwargs.get('uid'))).decode("utf-8").split(':')
         kwargs.update({'request' : self.request, 'uid': useruidandmethod[1], 'method': useruidandmethod[0]})
         return kwargs
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({"submit": _.submit_code})
-        return context
-
 class LoginEmail(LoginView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({"howto": _.tpl_email_code})
-        return context
+    add_to_context = {"howto": _.tpl_email_code, 'submit': _.submit_code, 'title': _.t_login}
 
 class LoginSms(LoginView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({"howto": _.tpl_sms_code})
-        return context
+    add_to_context = {"howto": _.tpl_sms_code, 'submit': _.submit_code, 'title': _.t_login}
 
 class LoginBasic(LoginView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({"howto": _.tpl_basic_code})
-        return context
+    add_to_context = {"howto": _.tpl_basic_code, 'submit': _.submit_code, 'title': _.t_login}
 
 class Logout(BaseView, LogoutView):
     app_label = 'mighty'
     model_name = 'authenticate'
-
+    add_to_context = {"howto": _.tpl_logout, 'title': _.t_logout}
+    
     def get_header(self):
         return {'title': _.t_login}
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({"howto": _.tpl_logout, "home": _.tpl_home})
-        return context

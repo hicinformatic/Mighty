@@ -1,12 +1,9 @@
 from django.conf import settings
 from mighty.views import ModelViewSet, DetailView
 from mighty.models.user import User
-from mighty.apps.user import filters
+from mighty.apps.user import filters, fields
 
 class UserMe(DetailView):
-    fields = ('last_name', 'first_name', 'email', 'phone', 'gender',)
-    no_permission = True
-
     def get_header(self):
         return {'title': 'me',}
 
@@ -22,10 +19,13 @@ class UserMe(DetailView):
         return context
 
 class UserViewSet(ModelViewSet):
+    me_no_permission = True
     model = User
     filter_model = filters.UserFilter
-    fields = ('last_name', 'first_name', 'email', 'phone', 'gender',)
-    add_fields = ('username', 'last_name', 'first_name', 'email', 'phone', 'gender',)
+    list_fields = fields.lst
+    add_fields = fields.add
+    export_fields = fields.export
+    list_is_ajax = True
 
     def __init__(self, model=None):
         super().__init__()

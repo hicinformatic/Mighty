@@ -11,7 +11,7 @@ class Nationality(ModelBase, ModelToSearch, ModelSignHash, ModelImage, ModelDisa
     numeric = models.CharField(_.f_numeric, max_length=3, blank=True, null=True)
     GENERATE_SIGNHASH = True
 
-    class Meta(ModelPermissions.Meta):
+    class Meta(ModelBase.Meta):
         abstract = True
         verbose_name = _.v_nationality
         verbose_name_plural = _.vp_nationality

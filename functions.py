@@ -1,4 +1,5 @@
 from django.utils.six.moves import input
+from django.apps import apps
 from mighty.apps import MightyConfig
 from Crypto import Cipher, Random
 import base64, datetime, string, random, unicodedata, re
@@ -23,16 +24,16 @@ def randomcode(stringLength):
 
 def make_float(flt):
     flt = re.compile(numeric_const_pattern, re.VERBOSE).search(flt).group().replace(',', '.')
-    #flt = str(flt).strip().replace(u'\xa0', u' ')
-    #for s in MightyConfig.intflt_toreplace:
-    #    flt = flt.replate(s, '')
     return float(flt)
 
 def make_int(itg):
-    #itg = str(itg).strip().replace(u'\xa0', u' ')
-    #for s in MightyConfig.intflt_toreplace:
-    #    itg = itg.replate(s, '')
     return int(make_float(itg))
+
+def make_string(self, input_str):
+    if (',' in input_str):
+        input_str = re.sub(r'[^\w\s]',' ',input_str).strip()
+        return input_str
+    return re.sub(r'[^\w\s]',' ', input_str).strip()
 
 def encrypt(key, raw):
     raw = pad(raw)
@@ -45,6 +46,14 @@ def decrypt(key, enc):
     iv = enc[:16]
     cipher = Cipher.AES.new(key, Cipher.AES.MODE_CFB, iv)
     return unpad(cipher.decrypt(enc[16:]))
+
+def get_model(label, model):
+    return apps.get_model(label, model)
+
+def input_get_model(reference):
+    label = input("What label is for the reference %s: " % reference)
+    model = input("What model is for the reference %s: " % reference)
+    return get_model(label, model)
 
 def boolean_input(question, default='n'):
     result = input("%s " % question)
@@ -82,6 +91,9 @@ def multipleobjects_onechoice(objects_list, reference, model):
         else:
             return objects[choice]
     return None
+
+def foreignkey_from(model, field, data, ret):
+    return getattr(model.objects.get(**{field: data}), ret)
     
 def make_searchable(input_str):
     for i in MightyConfig.Test.replace:

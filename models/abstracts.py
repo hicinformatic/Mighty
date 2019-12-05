@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse, NoReverseMatch
 from django.utils.html import format_html
+from django.utils.text import get_valid_filename
 
 from mighty import fields, _
 from mighty.models import JSONField
@@ -18,6 +19,10 @@ PERM_CHANGE = 'change'
 PERM_DELETE = 'delete'
 PERM_ENABLE = 'enable'
 PERM_DISABLE = 'disable'
+PERM_EXPORT = 'export'
+PERM_IMPORT = 'import'
+PERM_ALERT = 'alert'
+PERM_ERROR = 'error'
 PERM_ADMINPERM = 'admin_perm'
 PERM_ASKFORPERM = 'askfor_perm'
 
@@ -26,21 +31,45 @@ class ModelBase(models.Model):
     date_update = models.DateTimeField(_.f_date_update, auto_now=True, editable=False)
     update_by = models.CharField(_.f_update_by, blank=True, editable=False, max_length=254, null=True)
     title = {
-        'add': _.t_add,
-        'list': _.t_list,
-        'detail': _.t_detail,
-        'change': _.t_change,
-        'delete': _.t_delete,
-        'enable': _.t_enable,
-        'disable': _.t_disable, 
+        PERM_ADD: _.t_add,
+        PERM_LIST: _.t_list,
+        PERM_DETAIL: _.t_detail,
+        PERM_CHANGE: _.t_change,
+        PERM_DELETE: _.t_delete,
+        PERM_ENABLE: _.t_enable,
+        PERM_DISABLE: _.t_disable, 
+        PERM_EXPORT: _.t_export,
+        PERM_IMPORT: _.t_import,
+        PERM_ALERT: _.t_alert,
+        PERM_ERROR: _.t_error,
+        PERM_ADMINPERM: _.t_admin_perm,
+        PERM_ASKFORPERM: _.t_askfor_perm,
     }
 
     SHOW_DISPLAY_IN_URL = False
     GENERATE_SIGNHASH = False
     CAN_ASK_FOR_PERMISSIONS = False
 
-    def fields(self):
-        return self._meta.get_fields()
+    class Meta:
+        abstract = True
+        default_permissions = (
+            PERM_ADD,
+            PERM_DETAIL,
+            PERM_LIST,
+            PERM_CHANGE,
+            PERM_DELETE,
+            PERM_ENABLE,
+            PERM_DISABLE, 
+            PERM_EXPORT,
+            PERM_IMPORT,
+            PERM_ALERT,
+            PERM_ERROR,
+            PERM_ADMINPERM,
+            PERM_ASKFORPERM,
+        )
+
+    def fields(self, excludes=[]):
+        return [field for field in self._meta.get_fields() if field.__class__.__name__ not in excludes]
 
     @property
     def app_label(self):
@@ -123,24 +152,15 @@ class ModelBase(models.Model):
     def delete_url_html(self):
         return self.get_url_html('delete', self.title['delete'])
 
-    class Meta:
-        abstract = True
-        default_permissions = (
-            PERM_ADD,
-            PERM_DETAIL,
-            PERM_LIST,
-            PERM_CHANGE,
-            PERM_DELETE,
-        )
-
 class ModelUid(models.Model):
     uid = models.UUIDField(unique=True, default=uuid4, editable=False)
 
     class Meta:
         abstract = True
 
+IMAGE_DEFAULT = "none.jpg"
 class ModelImage(models.Model):
-    image = models.ImageField(upload_to=image_directory_path, default="none.jpg", blank=True, null=True)
+    image = models.ImageField(upload_to=image_directory_path, default=IMAGE_DEFAULT, blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -152,6 +172,20 @@ class ModelImage(models.Model):
     @property
     def image_url(self):
         return self.image.url
+
+    @property
+    def imagename(self):
+        return os.path.basename(self.image.name)
+
+    @property
+    def valid_imagename(self):
+        return get_valid_filename(self.imagename)
+
+    @property
+    def image_extension(self):
+        imagename, image_extension = os.path.splitext(self.imagename)
+        return image_extension
+
 
 class ModelDisplay(models.Model):
     display = models.CharField(_.f_display, blank=True, max_length=255, null=True)
@@ -230,15 +264,6 @@ class ModelDisable(models.Model):
 
     class Meta:
         abstract = True
-        default_permissions = (
-            PERM_ADD,
-            PERM_DETAIL,
-            PERM_LIST,
-            PERM_CHANGE,
-            PERM_DELETE,
-            PERM_ENABLE,
-            PERM_DISABLE,
-        )
 
     @property
     def is_enable(self):
@@ -314,17 +339,6 @@ class ModelPermissions(models.Model):
 
     class Meta:
         abstract = True
-        default_permissions = (
-            PERM_ADD,
-            PERM_DETAIL,
-            PERM_LIST,
-            PERM_CHANGE,
-            PERM_DELETE,
-            PERM_ENABLE,
-            PERM_DISABLE,
-            PERM_ADMINPERM,
-            PERM_ASKFORPERM,
-        )
 
 class ModelSource(models.Model):
     sources = JSONField(_.f_sources, blank=True, null=True)
@@ -356,6 +370,15 @@ class ModelFile(ModelBase, ModelUid):
         return os.path.basename(self.the_file.name)
 
     @property
+    def valid_filename(self):
+        return get_valid_filename(self.filename)
+
+    @property
+    def file_extension(self):
+        filename, file_extension = os.path.splitext(self.filename)
+        return file_extension
+
+    @property
     def fonta(self):
         return "alt"
 
@@ -374,5 +397,5 @@ class ModelFull(
     ModelImage,
     ModelDisplay,
     ModelPermissions):
-    class Meta(ModelPermissions.Meta):
+    class Meta(ModelBase.Meta):
         abstract = True
