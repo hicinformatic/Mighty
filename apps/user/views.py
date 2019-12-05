@@ -22,10 +22,10 @@ class UserViewSet(ModelViewSet):
     me_no_permission = True
     model = User
     filter_model = filters.UserFilter
-    list_fields = fields.lst
     add_fields = fields.add
     export_fields = fields.export
     list_is_ajax = True
+    fields = fields.lst
 
     def __init__(self, model=None):
         super().__init__()
