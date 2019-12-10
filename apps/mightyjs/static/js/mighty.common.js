@@ -18,7 +18,7 @@ function Mcommon(url, options={}) {
     this.log = function(lvl, msg, array=null) {
         if (!this.hasOwnProperty("logbg")) { this.logbg = this.randdarkcolor(); }
         if (this.debug) { 
-            console.log(`%c ${Date.now().toString()}: ${lvl} | ${msg}`, `background: ${this.logbg}; color: ${this.colors[lvl]}`); 
+            console.log("%c "+Date.now().toString()+": "+lvl+" | "+msg, "background: "+this.logbg+"; color: "+this.colors[lvl]); 
             if (array) { console[lvl](array); }
         }
     }
@@ -57,7 +57,7 @@ function Mcommon(url, options={}) {
     }
 
     this.add = function(config, key, value={}) {
-        this.log("debug", `add - config: ${config}, key: ${key}`, config);
+        this.log("debug", "add - config: "+config+", key: "+key, config);
         if(!this.config.hasOwnProperty(config)) {
             this.questions.lasts[config] = {};
             //this.elements[config] = {};
@@ -85,18 +85,23 @@ function Mcommon(url, options={}) {
         xhttp.timeout = this.config[config].hasOwnProperty("method") ? this.config[config]["timeout"] : this.timeout;
         xhttp.responseType = this.config[config].hasOwnProperty("datatype") ? this.config[config]["datatype"] : this.datatype;
         xhttp.onprogress = function () {
-            self.log("log", `onprogress - url: ${url}, method: ${method}, config: ${config}`);
+            self.log("log", "onprogress - url: "+url+", method: "+method+", config: "+config);
         };
         xhttp.onload = function (e) {
-            self.log("log", `onload - url: ${url}, method: ${method}, config: ${config}`, xhttp.response);
+            self.log("log", "onload - url: "+url+", method: "+method+", config: "+config, xhttp.response);
             self.template(config, xhttp.response);
+            if (datas) {
+                window.history.replaceState("", "", "?" + datas);
+            }else{
+                window.history.replaceState("", "", self.burl);
+            }
         };
         xhttp.onabort = function (e) {
-            self.log("error", `onabort - url: ${url}, method: ${method}, config: ${config}`, e);
+            self.log("error", "onabort - url: "+url+", method: "+method+", config: "+config, e);
             self.protect(config, false);
         };
         xhttp.onerror = function (e) {
-            self.log("error", `onerror - url: ${url}, method: ${method}, config: ${config}`, e);
+            self.log("error", "onerror - url: "+url+", method: "+method+", config: "+config, e);
             self.protect(config, false);
         };
         if (method=="GET" && datas) {
@@ -134,7 +139,7 @@ function Mcommon(url, options={}) {
     }
 
     this.template = function(config, response) {
-        var source = document.getElementById(`template-${config}`).innerHTML;
+        var source = document.getElementById("template-"+config).innerHTML;
         source = source.replace(/\[\[/g, '{{');
         source = source.replace(/\]\]/g, '}}');
         var template = Handlebars.compile(source);

@@ -74,6 +74,9 @@ class BaseCommand(BaseCommand):
     def test(self, data):
         return functions.test(data)
 
+    def similar_text(self, str1, str2):
+        return functions.similar_text(str1, str2)
+
     def foreignkey_from(self, model, field, data, ret):
         return functions.foreignkey_from(model, field, data, ret)
 
@@ -97,14 +100,15 @@ class BaseCommand(BaseCommand):
         self.logger.info('--- Start ---')
 
     def get_fk_from(self, fields):
-        for field in fields.split(','):
-            self.foreignkey[field] = {
-                'model': self.input_get_model(field), 
-                'field': input("What field to use for the reference %s: " % field),
-                'data': input("What field data to use for the reference %s: " % field),
-                'return': input("What field return to use for the reference %s: " % field)
-            }
-            self.logger.info('Model use for field %s: %s' % (field, self.foreignkey[field]))
+        if self.test(fields):
+            for field in fields.split(','):
+                self.foreignkey[field] = {
+                    'model': self.input_get_model(field), 
+                    'field': input("What field to use for the reference %s: " % field),
+                    'data': input("What field data to use for the reference %s: " % field),
+                    'return': input("What field return to use for the reference %s: " % field)
+                }
+                self.logger.info('Model use for field %s: %s' % (field, self.foreignkey[field]))
 
     def add_arguments(self, parser):
         parser.add_argument('--logfile', default="%s_%s.log" % (str(self.subcommand).lower(), now))

@@ -189,13 +189,14 @@ class ModelImage(models.Model):
 
 class ModelDisplay(models.Model):
     display = models.CharField(_.f_display, blank=True, max_length=255, null=True)
+    FORCE_UPDATE_DISPLAY = False
     SHOW_DISPLAY_IN_URL = True
 
     class Meta:
         abstract = True
 
     def set_display(self):
-        if self.display is None and test(self.__str__()):
+        if self.FORCE_UPDATE_DISPLAY or self.display is None and test(self.__str__()):
             self.display = str(self.__str__())
 
     def save(self, *args, **kwargs):

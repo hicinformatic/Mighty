@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpResponseRedirect, StreamingHttpResponse
-
+from django.utils.text import get_valid_filename
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views.generic.detail import DetailView
@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.urls import path, include
 
 from copy import deepcopy
-from mighty.functions import logger
+from mighty.functions import logger, make_searchable
 from mighty import _
 
 import csv
@@ -110,6 +110,8 @@ class BaseView(PermissionRequiredMixin):
             'view': self.__class__.__name__,
             'fields': self.fields,
         })
+        if hasattr(settings, "CONTEXT_ADD"):
+            context.update({"additional": settings.CONTEXT_ADD})
         context.update(self.get_permissions())
         context.update(self.add_to_context)
         context.update({ 'meta': self.get_meta(context['translate']['titles'], context['view']),})
@@ -181,7 +183,7 @@ class ExportView(ListView):
             streaming_content=(self.iter_items(self.model.objects.all().values_list(*self.fields), Echo())),
             content_type='text/csv',
         )
-        response['Content-Disposition'] = 'attachment;filename=items.csv'
+        response['Content-Disposition'] = 'attachment;filename=%s.csv' % get_valid_filename(make_searchable(self.model._meta.verbose_name))
         return response
 
 class AdminView(object):

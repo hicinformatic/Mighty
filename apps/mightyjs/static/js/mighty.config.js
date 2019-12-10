@@ -1,5 +1,6 @@
 function Mconfig(url, options={}) {
     //this.id = id;
+    this.burl = location.protocol + '//' + location.host + location.pathname;
     this.url = url;
     this.options = options;
 
@@ -52,7 +53,7 @@ function Mconfig(url, options={}) {
         search: "Search",
         searchex: "Exact search",
         displayer: "Columns displayed",
-        displayall: `${this.icons.displayall} Show all`,
-        displaynone: `${this.icons.displaynone} Hide all`,
+        displayall: this.icons.displayall+" Show all",
+        displaynone: this.icons.displaynone+" Hide all",
     };
 }

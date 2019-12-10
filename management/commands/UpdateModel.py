@@ -1,6 +1,10 @@
 from mighty.management import BaseCommand
 
 class updateModel(BaseCommand):
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument('--force-display', action="store_true")
+
     def do(self, options):
         self.totalrows = self.model.objects.all().count()
         for obj in self.model.objects.all():
