@@ -1,9 +1,11 @@
-function Mconfig(id, url, options={}) {
-    this.id = id;
+function Mconfig(url, options) {
+    //this.id = id;
+    this.burl = location.protocol + '//' + location.host + location.pathname;
     this.url = url;
-    this.options = options;
+    this.options = options = options === undefined ? {} : options;
 
-    this.elements = {commands: {},};
+    //this.elements = {commands: {},};
+    this.form = {search: null,};
     this.config = {};
     this.timer = {};
     this.questions = {i: {}, is: {}, lasts: {},};
@@ -51,7 +53,7 @@ function Mconfig(id, url, options={}) {
         search: "Search",
         searchex: "Exact search",
         displayer: "Columns displayed",
-        displayall: `${this.icons.displayall} Show all`,
-        displaynone: `${this.icons.displaynone} Hide all`,
+        displayall: this.icons.displayall+" Show all",
+        displaynone: this.icons.displaynone+" Hide all",
     };
 }
