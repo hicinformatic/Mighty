@@ -1,8 +1,8 @@
-function Mconfig(url, options={}) {
+function Mconfig(url, options) {
     //this.id = id;
     this.burl = location.protocol + '//' + location.host + location.pathname;
     this.url = url;
-    this.options = options;
+    this.options = options = options === undefined ? {} : options;
 
     //this.elements = {commands: {},};
     this.form = {search: null,};
