@@ -1,4 +1,4 @@
-function Mcommon(url, options={}) {
+function Mcommon(url, options) {
     //Mconfig.call(this, id, url, options);
     Mconfig.call(this, url, options);
 
@@ -15,7 +15,8 @@ function Mcommon(url, options={}) {
         return rgb;
     }
 
-    this.log = function(lvl, msg, array=null) {
+    this.log = function(lvl, msg, array) {
+        array = array === undefined ? null : array;
         if (!this.hasOwnProperty("logbg")) { this.logbg = this.randdarkcolor(); }
         if (this.debug) { 
             console.log("%c "+Date.now().toString()+": "+lvl+" | "+msg, "background: "+this.logbg+"; color: "+this.colors[lvl]); 
@@ -29,15 +30,16 @@ function Mcommon(url, options={}) {
         this.timer[config] = setTimeout(function() { self.xhr(config); }, ms || 0);
     }
 
-    this.last = function(config, what, like=null) {
-        if (like === null) {
+    this.last = function(config, what, like) {
+        if (like === undefined) {
             this.questions.lasts[config][what.key] = what.value;
         } else {
             return (this.questions.lasts[config].hasOwnProperty(what) && this.questions.lasts[config][what] === like) ? false : true;
         }
     }
 
-    this.i = function(what, i=0) {
+    this.i = function(what, i) {
+        i = i === undefined ? 0 : i;
         if (this.questions.i.hasOwnProperty(what)) {
             i = this.questions.i[what];
         } else {
@@ -47,7 +49,9 @@ function Mcommon(url, options={}) {
         return i;
     }
 
-    this.is = function(what, status=false, is=false) {
+    this.is = function(what, status, is) {
+        status = status === undefined ? false : status;
+        is = is === undefined ? false : is;
         if (this.questions.is.hasOwnProperty(what) && this.questions.is[what]) {
             is = this.questions.is[what];
         } else {
@@ -56,7 +60,8 @@ function Mcommon(url, options={}) {
         return is;
     }
 
-    this.add = function(config, key, value={}) {
+    this.add = function(config, key, value) {
+        value = value === undefined ? {} : value;
         this.log("debug", "add - config: "+config+", key: "+key, config);
         if(!this.config.hasOwnProperty(config)) {
             this.questions.lasts[config] = {};
@@ -74,6 +79,17 @@ function Mcommon(url, options={}) {
           }
         return str.join("&");
     }
+
+    this.addEvent = function(evnt, elem, func) {
+        if (elem.addEventListener)  // W3C DOM
+           elem.addEventListener(evnt,func,false);
+        else if (elem.attachEvent) { // IE DOM
+           elem.attachEvent("on"+evnt, func);
+        }
+        else { // No much to do
+           elem["on"+evnt] = func;
+        }
+     }
 
     this.xhr = function(config) {
         this.protect(config);
@@ -111,13 +127,15 @@ function Mcommon(url, options={}) {
         xhttp.send(datas);
     }
 
-    this.protect = function(config, status=true){
+    this.protect = function(config, status){
+        status = status === undefined ? true : status;
         if (status) {
         }else{
         }
     }
 
-    this.process = function(ms=500) {
+    this.process = function(ms) {
+        ms = ms === undefined ? 500 : ms;
         for (config in this.config) {
             this.delay(config, ms);
             //this.xhr(config);
@@ -128,9 +146,10 @@ function Mcommon(url, options={}) {
         this.searchable(this.is("searchable"));
     }
 
-    this.searchable = function(searchable, self=this) {
+    this.searchable = function(searchable) {
+        self = this;
         if (searchable) {
-            document.getElementById(searchable).addEventListener('keyup', function(e) {
+           this.addEvent('keyup', document.getElementById(searchable), function(e) {
                 self.form.search = this.value;
                 self.process(500);
             });
