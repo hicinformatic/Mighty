@@ -1,4 +1,4 @@
-base = ('id', 'date_create','date_update','update_by',)
+base = ('id', 'date_create', 'date_update', 'update_by', )
 modeluid = ('uid',)
 image = ('image',)
 display = ('display',)
@@ -7,30 +7,5 @@ signhash = ('signhash',)
 disable = ('is_disable',)
 alert = ('alerts',)
 error = ('errors',)
+files = ('the_file', 'mimetype', 'file_name')
 full = base + modeluid + display + tosearch + signhash + disable + alert + error
-
-readonly_fields =  base + modeluid + tosearch + signhash + disable + alert + error
-list_display = display + disable
-list_filter = disable
-search_fields = display + tosearch
-
-notsignhash = (
-    'id',
-    'uid',
-    'logentry',
-    'display',
-    'is_disable',
-    'to_search',
-    'date_create',
-    'date_update',
-    'update_by',
-    'signhash',
-    'initials',
-    'alerts',
-    'errors',
-)
-
-file_fields = (
-    'the_file',
-    'mime_type',
-)

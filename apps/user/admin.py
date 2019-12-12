@@ -22,16 +22,16 @@ class UserAdmin(OverAdmin, UserAdmin):
     fieldsets = (((None, {'fields': ('username', 'password', 'method')})),
                 (_.a_personal_info, {'fields': personal_info_fields}),
                 (_.a_permissions, {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-                (_.a_api, {'fields': ('key', 'tokens', 'codes')}),
                 (_.a_importante_dates, {'fields': ('last_login', 'date_joined')}),
-                (_.a_ip, {'fields': ('ipv4', 'ipv6', 'sign')}),
+                (_.a_api, {'classes': ('collapse',), 'fields': ('key', 'tokens', 'codes')}),
+                (_.a_ip, {'classes': ('collapse',), 'fields': ('ipv4', 'ipv6', 'sign')}),
                 (fset_default),
                 (fset_infos),)
     filter_horizontal = filter_horizontal
-    readonly_fields = fields.full + ('key', 'tokens', 'codes', 'ipv4', 'ipv6', 'sign') 
-    list_display = fields.list_display + ('email', 'gender', 'ipv4', 'ipv6') 
-    list_filter = (InErrorListFilter, InAlertListFilter) + fields.list_filter + ('is_active', 'gender', 'is_staff', 'is_superuser')
-    search_fields = fields.search_fields + ('email', 'ipv4', 'ipv6')
+    readonly_fields = fields.base + fields.modeluid + fields.signhash + fields.disable + ('ipv4', 'ipv6', 'sign') 
+    list_display = fields.display + fields.disable + ('email', 'gender', 'date_create',) 
+    list_filter = (InErrorListFilter, InAlertListFilter) + fields.disable + ('is_active', 'gender', 'is_staff', 'is_superuser')
+    search_fields = fields.display + fields.tosearch + ('email', 'last_name', 'first_name')
 
     def save_model(self, request, obj, form, change):
         if not change:

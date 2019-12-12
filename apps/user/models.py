@@ -27,13 +27,13 @@ class User(AbstractUser, ModelFull):
         (METHOD_IMPORT, _.c_method_import),
     )
     method = models.CharField(_.f_method, choices=choices, default=METHOD_FRONTEND, max_length=15)
-    sign = models.CharField(_.f_sign, default=key, max_length=32, unique=True, editable=False)
-    key = models.CharField(_.f_key, default=key, max_length=32, unique=True, editable=False)
+    sign = models.CharField(_.f_sign, default=key, max_length=32, unique=True)
+    key = models.CharField(_.f_key, default=key, max_length=32, unique=True)
     choices = ((GENDER_MAN, _.c_man), (GENDER_WOMAN, _.c_woman))
     gender = models.CharField(_.f_gender, max_length=1, choices=choices, blank=True, null=True)
     phone = models.CharField(_.f_phone, blank=True, max_length=20, null=True, unique=True)
-    tokens = JSONField(_.f_tokens, blank=True, null=True, editable=False)
-    codes = JSONField(_.f_codes, blank=True, null=True, editable=False)
+    tokens = JSONField(_.f_tokens, blank=True, null=True)
+    codes = JSONField(_.f_codes, blank=True, null=True)
     ipv4 = models.GenericIPAddressField(_.f_ipv4, blank=True, null=True, editable=False)
     ipv6 = models.GenericIPAddressField(_.f_ipv6, blank=True, null=True, editable=False)
 

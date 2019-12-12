@@ -23,6 +23,8 @@ f_errors = _('Erreurs')
 f_default = _('Défaut')
 f_infos = _('Informations')
 f_sources = _('Sources')
+f_mimetype = _('Mime Type')
+f_file_name = _('File name')
 
 t_add  = _('Ajouter')
 t_list  = _('Liste')

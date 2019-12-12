@@ -96,8 +96,12 @@ function Mcommon(url, options) {
         var self = this;
         var url = this.config[config].hasOwnProperty("url") ? this.config[config]["url"] : this.url;
         var datas = this.config[config].hasOwnProperty("datas") ? this.serialize(this.config[config]["datas"]) : this.serialize(this.form);
+        self.log("log", "datas", datas);
         var method = this.config[config].hasOwnProperty("method") ? this.config[config]["method"] : this.method;
         var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+        if (method=="GET" && datas) {
+            url = url + "?" + datas;
+        }
         xhttp.open(method, url, true);
         xhttp.timeout = this.config[config].hasOwnProperty("method") ? this.config[config]["timeout"] : this.timeout;
         xhttp.responseType = this.config[config].hasOwnProperty("datatype") ? this.config[config]["datatype"] : this.datatype;
@@ -106,7 +110,7 @@ function Mcommon(url, options) {
         };
         xhttp.onload = function (e) {
             self.log("log", "onload - url: "+url+", method: "+method+", config: "+config, xhttp.response);
-            self.template(config, xhttp.response);
+            self.template(config, JSON.parse(xhttp.response));
             if (datas) {
                 window.history.replaceState("", "", "?" + datas);
             }else{
@@ -121,9 +125,6 @@ function Mcommon(url, options) {
             self.log("error", "onerror - url: "+url+", method: "+method+", config: "+config, e);
             self.protect(config, false);
         };
-        if (method=="GET" && datas) {
-            url = url + "?" + datas;
-        }
         xhttp.send(datas);
     }
 
@@ -165,7 +166,6 @@ function Mcommon(url, options) {
         var html = template({"datas": response[this.ajax.results]});
         document.getElementById(config).innerHTML = html;
         this.protect(config, false);
-
     }
 
 }

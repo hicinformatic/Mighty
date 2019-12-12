@@ -204,7 +204,7 @@ class ModelDisplay(models.Model):
         super().save(*args, **kwargs)
 
 class ModelToSearch(models.Model):
-    to_search = models.TextField(_.f_to_search, db_index=True, blank=True, editable=False, null=True)
+    to_search = models.TextField(_.f_to_search, db_index=True, blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -357,8 +357,8 @@ class ModelSource(models.Model):
 
 class ModelFile(ModelBase, ModelUid):
     the_file = models.FileField(upload_to=file_directory_path)
-    mimetype = models.CharField('Mime Type', max_length=255, blank=True, null=True)
-    name = models.CharField('Name', max_length=255, blank=True, null=True)
+    mimetype = models.CharField(_.f_mimetype, max_length=255, blank=True, null=True)
+    file_name = models.CharField(_.f_file_name, max_length=255, blank=True, null=True)
     
     class Meta(ModelBase.Meta):
         abstract = True

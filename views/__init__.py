@@ -210,6 +210,11 @@ class ViewSet(object):
     add_to_context = {}
     is_ajax = False
 
+    def Vgetattr(self, view, attr, default=False):
+        if hasattr(view, '%s' % attr): return getattr(view, '%s' % attr)
+        if hasattr(self, '%s_%s' % (view, attr)): return getattr(self, '%s_%s' % (view, attr))
+        return default
+
     def __init__(self):
         self.views = deepcopy(self.views)
         for k in self.excluded_views:
@@ -222,8 +227,9 @@ class ViewSet(object):
         View.add_to_context = getattr(self, '%s_add_to_context' % view) if hasattr(self, '%s_add_to_context' % view) else self.add_to_context
         View.is_ajax = getattr(self, '%s_is_ajax' % view) if hasattr(self, '%s_is_ajax' % view) else self.is_ajax
         View.fields = getattr(self, '%s_fields' % view) if hasattr(self, '%s_fields' % view) else self.fields
-        View.no_permission = getattr(self, '%s_no_permission' % view) if hasattr(self, '%s_no_permission' % view) else False
+        View.no_permission = self.Vgetattr(View, 'no_permission')
         if not View.no_permission: View.permission_required = (self.model().perm(view),)
+        print("%s, %s, %s" % (View, View.no_permission, View.permission_required))
         for k, v in kwargs.items(): setattr(View, k, v)
         if view == 'list':
             if self.filter_model is not None:

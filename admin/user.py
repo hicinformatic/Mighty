@@ -17,10 +17,6 @@ if 'mighty.apps.extend' in settings.INSTALLED_APPS:
         model = models.UserHistory
     user_inlines = [UserExtendAdminInline, UserHistoryAdminInline]
 
-#@admin.register(Group)
-#class GroupAdmin(GroupAdmin):
-#    pass
-
 @admin.register(Permission)
 class PermissionAdmin(admin.ModelAdmin):
     list_filter = ('content_type',)

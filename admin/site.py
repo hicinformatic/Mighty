@@ -20,8 +20,10 @@ from mighty.actions import enable_selected, disable_selected
 from mighty import  _
 from mighty import fields
 
-fset_default = (_.f_default, {'fields': ('display', 'image')})
-fset_infos = (_.f_infos, {'fields': (fields.readonly_fields)})
+fset_default = (_.f_default, {'classes': ('collapse',), 'fields': fields.display + fields.image})
+fset_infos = (_.f_infos, {
+    'classes': ('collapse',), 
+    'fields': fields.base + fields.modeluid + fields.disable + fields.tosearch + fields.signhash + fields.alert + fields.error})
 
 class InAlertListFilter(admin.SimpleListFilter):
     title = _.f_alerts
@@ -49,10 +51,10 @@ class OverAdmin(admin.ModelAdmin):
     disable_confirmation_template = None
     enable_selected_confirmation_template = None
     enable_confirmation_template = None
-    list_display = fields.list_display
-    list_filter = (InErrorListFilter, InAlertListFilter) + fields.list_filter
-    readonly_fields = fields.full
-    search_fields = fields.search_fields
+    list_display = fields.display + fields.disable
+    list_filter = (InErrorListFilter, InAlertListFilter) + fields.disable
+    readonly_fields = fields.base + fields.modeluid + fields.signhash + fields.disable
+    search_fields = fields.display + fields.tosearch
     save_on_top = True
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget},
