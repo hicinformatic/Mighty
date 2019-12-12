@@ -96,21 +96,21 @@ function Mcommon(url, options) {
         var self = this;
         var url = this.config[config].hasOwnProperty("url") ? this.config[config]["url"] : this.url;
         var datas = this.config[config].hasOwnProperty("datas") ? this.serialize(this.config[config]["datas"]) : this.serialize(this.form);
-        self.log("log", "datas", datas);
         var method = this.config[config].hasOwnProperty("method") ? this.config[config]["method"] : this.method;
+        var datatype = this.config[config].hasOwnProperty("datatype") ? this.config[config]["datatype"] : this.datatype;
         var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
         if (method=="GET" && datas) {
+            self.log("log", "datas", datas);
             url = url + "?" + datas;
         }
         xhttp.open(method, url, true);
         xhttp.timeout = this.config[config].hasOwnProperty("method") ? this.config[config]["timeout"] : this.timeout;
-        xhttp.responseType = this.config[config].hasOwnProperty("datatype") ? this.config[config]["datatype"] : this.datatype;
         xhttp.onprogress = function () {
             self.log("log", "onprogress - url: "+url+", method: "+method+", config: "+config);
         };
         xhttp.onload = function (e) {
-            self.log("log", "onload - url: "+url+", method: "+method+", config: "+config, xhttp.response);
-            self.template(config, JSON.parse(xhttp.response));
+            self.log("log", "onload - url: "+url+", datatype: "+datatype, xhttp.response);
+            if (datatype == "json") self.template(config, JSON.parse(xhttp.response));
             if (datas) {
                 window.history.replaceState("", "", "?" + datas);
             }else{

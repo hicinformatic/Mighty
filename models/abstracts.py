@@ -387,6 +387,11 @@ class ModelFile(ModelBase, ModelUid):
     def url(self):
         return self.the_file.url
 
+    def save(self, *args, **kwargs):
+        if self.file_name is None:
+            self.file_name = self.valid_filename
+        super().save(*args, **kwargs)
+
 class ModelFull(
     ModelUid,
     ModelBase,

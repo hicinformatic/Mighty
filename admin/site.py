@@ -434,5 +434,5 @@ class AdminSite(admin.AdminSite):
         return LoginView.as_view(**defaults)(request)
 
 class FileInlineAdmin(admin.TabularInline):
-    fields = ('the_file', 'mimetype', 'name')
+    fields = ('the_file', 'mimetype', 'file_name')
     extra = 1
