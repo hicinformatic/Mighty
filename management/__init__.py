@@ -1,6 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Q
+from django.core.exceptions import MultipleObjectsReturned
 from django.utils.six.moves import input
 from mighty import functions
+from mighty.apps import MightyConfig
 import os.path, csv, sys, logging, re, time, uuid
 
 now = time.strftime("%Y%m%d")
@@ -25,18 +28,24 @@ class Error:
 
 class BaseCommand(BaseCommand):
     help = 'Commande Base'
+    testconfig = MightyConfig.Test.search
     logger = logging.getLogger('')
     error = Error
     fields_forbidden = ['id', 'display']
     fields_retrieve = ['uid',]
     fields_associates = {}
     fields_unique = []
+    fields_uncomment = []
+    fields_keepcomment = []
     foreignkey = {}
     reverse_associates = {}
     source = {}
     found = {}
-    total_rows = 0
-    current_row = 0
+    passing = []
+    total_rows = 1
+    current_row = 1
+    current_datas = None
+    alerts = {}
 
     def get_model(self, label, model):
         return functions.get_model(label, model)
@@ -72,7 +81,7 @@ class BaseCommand(BaseCommand):
         return functions.make_string(input_str)
 
     def test(self, data):
-        return functions.test(data)
+        return functions.test(data, search=self.testconfig)
 
     def similar_text(self, str1, str2):
         return functions.similar_text(str1, str2)
@@ -83,6 +92,75 @@ class BaseCommand(BaseCommand):
     def create_parser(self, prog_name, subcommand, **kwargs):
         self.subcommand = subcommand
         return super().create_parser(prog_name, subcommand)
+
+    def give_one(self, row, models_args, *args, **kwargs):
+        usemodel = kwargs['model'] if 'model' in kwargs else self.model
+        obj = False
+        try:
+            obj = usemodel.objects.get(Q(**{arg: models_args[arg] for arg in models_args}))
+        except usemodel.DoesNotExist:
+            self.error.add(usemodel, "Not found %s" % (models_args), self.current_row)
+        except MultipleObjectsReturned:
+            if str(models_args) in self.passing:
+                pass
+            elif str(models_args) in self.found:
+                obj = self.found[str(models_args)]
+            else:
+                objects_list = usemodel.objects.filter(Q(**{arg: models_args[arg] for arg in models_args}))
+                obj = self.multipleobjects_onechoice(objects_list, str(models_args), usemodel)
+                if obj:
+                    self.found[str(models_args)] = obj
+                else:
+                    self.passing.append(str(models_args))
+        return obj
+
+    def search_one(self, row, models_args, *args, **kwargs):
+        usemodel = kwargs['model'] if 'model' in kwargs else self.model
+        usesearch = kwargs['search'] if 'search' in kwargs else self.search
+        obj = False
+        if self.test(usesearch):
+            models_srch = False
+            for field in usesearch.split(","):
+                for search in self.field(field, row).split(" "):
+                    if models_srch:
+                        models_srch = models_srch | Q(to_search__icontains=self.make_searchable(search))
+                    else:
+                        models_srch = Q(to_search__icontains=self.make_searchable(search))
+            try:
+                if str(models_args) in self.passing:
+                    pass
+                elif str(models_args) in self.found:
+                    obj = self.found[str(models_args)]
+                else:
+                    objects_list = usemodel.objects.filter(models_srch)
+                    obj = self.multipleobjects_onechoice(objects_list, str(models_args), usemodel)
+                    if obj:
+                        self.found[str(models_args)] = obj
+                    else:
+                        self.passing.append(str(models_args))
+            except usemodel.DoesNotExist:
+                    self.error.add(usemodel, "Not found %s" % (models_args), self.current_row)
+        return obj
+
+    def create_one(self, row, models_args, *args, **kwargs):
+        usemodel = kwargs['model'] if 'model' in kwargs else self.model
+        usesearch = kwargs['search'] if 'search' in kwargs else self.search
+        if self.create or self.createforce:
+            sobj = self.field(usesearch, row)
+            if sobj not in self.found:
+                if self.myself:
+                    obj = self.object_search(usemodel, sobj)
+                    if obj:
+                        self.found[sobj] = obj
+                elif self.test(models_args):
+                    if self.createforce:
+                        obj = usemodel(**models_args)
+                        obj.save()      
+                    elif self.boolean_input('Create %s?' % models_args):
+                        obj = usemodel(**models_args)
+                        obj.save()
+            else:
+                obj = self.found[sobj]
 
     def progressBar(self, value, endvalue, bar_length=20):
         percent = float(value) / endvalue
@@ -114,6 +192,8 @@ class BaseCommand(BaseCommand):
         parser.add_argument('--logfile', default="%s_%s.log" % (str(self.subcommand).lower(), now))
         parser.add_argument('--progressbar', action="store_true")
         parser.add_argument('--create', action="store_true")
+        parser.add_argument('--createforce', action="store_true")
+        parser.add_argument('--bypasscheck', action="store_true")
         parser.add_argument('--myself', action="store_true")
         parser.add_argument('--label', required=True)
         parser.add_argument('--model', required=True)
@@ -127,6 +207,8 @@ class BaseCommand(BaseCommand):
         self.error = Error(self.logger)
         self.search = options.get('search')
         self.create = options.get('create')
+        self.createforce = options.get('createforce')
+        self.bypasscheck = options.get('bypasscheck')
         self.myself = options.get('myself')
         retrieve = options.get('retrieve')
         if retrieve: self.fields_retrieve = [field for field in retrieve.split(",")]
@@ -152,6 +234,9 @@ class BaseCommand(BaseCommand):
     def after(self, options):
         pass
 
+    def split_comment(self, input_str):
+        return functions.split_comment(input_str)
+
     def errors_in_logfile(self, logfile):
         with open(logfile, "w") as f:
             for key, errors in self.error.errors.items():
@@ -161,21 +246,33 @@ class BaseCommand(BaseCommand):
         f.close()
         self.logger.info('Errors: %s' % self.error.count)
 
+    def good_field(self, field):
+        return self.fields_associates[field] if field in self.fields_associates else field
+
     def field(self, field, row):
-        #sfield = self.fields_associates[field] if field in self.fields_associates else field
-        #if hasattr(self, 'get_%s' % field):
-        #    return getattr(self, 'get_%s' % field)(row[sfield])
-        #return row[sfield] if self.test(row[sfield]) else None
-        sfield = self.fields_associates[field] if field in self.fields_associates else field
-        if hasattr(self, 'get_%s' % field):
-            return getattr(self, 'get_%s' % field)(row[sfield])
-        elif sfield in row and self.test(row[sfield]):
-            if sfield in self.foreignkey:
-                return self.foreignkey_from(
-                    self.foreignkey[sfield]['model'],
-                    self.foreignkey[sfield]['field'],
-                    row[self.foreignkey[sfield]['data']],
-                    self.foreignkey[sfield]['return']
-                )
-            return row[sfield]
+        alert = False
+        sfield = self.good_field(field)
+        if sfield in row:
+            if field in self.fields_uncomment or field in self.fields_keepcomment:
+                nfield = self.split_comment(row[sfield])
+                if nfield:
+                    value = nfield.group(1)
+                    comment = nfield.group(2)
+                    row[sfield] = value.strip() if self.test(value) else None
+                    if field in self.fields_keepcomment:
+                        if field in self.alerts:
+                            self.alerts[field].append(comment.strip()) 
+                        else:
+                            self.alerts[field] = [comment.strip(),]
+            if hasattr(self, 'get_%s' % field):
+                return getattr(self, 'get_%s' % field)(row[sfield].strip())
+            elif self.test(row[sfield]):
+                if sfield in self.foreignkey:
+                    return self.foreignkey_from(
+                        self.foreignkey[sfield]['model'],
+                        self.foreignkey[sfield]['field'],
+                        row[self.foreignkey[sfield]['data']],
+                        self.foreignkey[sfield]['return']
+                    )
+                return row[sfield].strip()
         return None

@@ -9,8 +9,8 @@ pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
 unpad = lambda s : s[:-ord(s[len(s)-1:])]
 numeric_const_pattern = '[-+]? (?: (?: \d* [\.,] \d+ ) | (?: \d+ [\.,]? ) )(?: [Ee] [+-]? \d+ ) ?'
 
-def test(input_str=None):
-    return True if str(input_str).strip().lower().replace(' ', '') not in MightyConfig.Test.search else False
+def test(input_str=None, search=MightyConfig.Test.search):
+    return True if str(input_str).strip().lower().replace(' ', '') not in search else False
 
 def get_or_none(data):
     return data if not test(data) else None
@@ -23,17 +23,24 @@ def randomcode(stringLength):
     return ''.join(random.choice(letters).upper() for i in range(stringLength))
 
 def make_float(flt):
-    flt = re.compile(numeric_const_pattern, re.VERBOSE).search(flt).group().replace(',', '.')
-    return float(flt)
+    if test(flt):
+        flt = re.compile(numeric_const_pattern, re.VERBOSE).search(flt).group().replace(',', '.')
+        return float(flt)
+    return None
 
 def make_int(itg):
-    return int(make_float(itg))
+    if test(itg):
+        return int(make_float(itg))
+    return None
 
-def make_string(self, input_str):
+def make_string(input_str):
     if (',' in input_str):
         input_str = re.sub(r'[^\w\s]',' ',input_str).strip()
         return input_str
     return re.sub(r'[^\w\s]',' ', input_str).strip()
+
+def split_comment(input_str):
+    return re.search( "([\w\d&,\. ]+)?\((.*)\)" , input_str)
 
 def encrypt(key, raw):
     raw = pad(raw)

@@ -229,7 +229,6 @@ class ViewSet(object):
         View.fields = getattr(self, '%s_fields' % view) if hasattr(self, '%s_fields' % view) else self.fields
         View.no_permission = self.Vgetattr(View, 'no_permission')
         if not View.no_permission: View.permission_required = (self.model().perm(view),)
-        logger("mighty", "info", "%s, %s, %s" % (View, View.no_permission, View.permission_required))
         for k, v in kwargs.items(): setattr(View, k, v)
         if view == 'list':
             if self.filter_model is not None:

@@ -5,7 +5,6 @@ from mighty.apps.nationality.models import Nationality
 class Nationality(Nationality):
     pass
 
-
 if 'mighty.apps.extend' in settings.INSTALLED_APPS:
     from mighty.models.extend import Extend, History
     from mighty.apps.extend.functions import related_name

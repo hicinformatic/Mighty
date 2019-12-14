@@ -315,6 +315,20 @@ class ModelAlert(models.Model):
         title.update({'in_alert': _.t_inalert})
         return title
 
+    def add_alert(self, alert, field=None):
+        if self.alerts is None: self.alerts = {}
+
+        if field is not None and hasattr(self, field):
+            if field in self.alerts and alert not in self.alerts[field]:
+                self.alerts[field].append(alert)
+            else:
+                self.alerts[field] = [alert,]
+        else:
+            if "alerts" in self.alerts and alert not in self.alerts["alerts"]:
+                self.alerts["alerts"].append(alert)
+            else:
+                self.alerts[field] = [alert,]
+
 
 class ModelError(models.Model):
     errors = JSONField(_.f_errors, blank=True, null=True)
