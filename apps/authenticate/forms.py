@@ -33,7 +33,7 @@ class UserSearchForm(forms.Form):
     }
 
     def clean(self):
-        search = self.cleaned_data.get('search')
+        search = self.cleaned_data.get('search').lower()
         method = self.cleaned_data.get("method")
     
         try:

@@ -238,7 +238,7 @@ class ViewSet(object):
         View.no_permission = self.Vgetattr(View, 'no_permission')
         if not View.no_permission: View.permission_required = (self.model().perm(view),)
         for k, v in kwargs.items(): setattr(View, k, v)
-        if view == 'list' or view == 'export':
+        if view not in ['detail', 'change', 'delete', 'enable', 'disable']:
             if self.filter_model is not None:
                 View.filter_model = self.filter_model
         return View
@@ -264,7 +264,6 @@ class ViewSet(object):
 
 class ModelViewSet(ViewSet):
     model = None
-
     fields = '__all__'
     notuseid = ['list', 'add', 'export', 'import']
     slug = '<uuid:uid>'
