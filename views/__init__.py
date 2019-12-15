@@ -179,8 +179,16 @@ class ExportView(ListView):
 
     def render_to_response(self, context, **response_kwargs):
         frmat = self.request.GET.get('format', '')
+
+        if self.filter_model:
+            queryset, q = self.filter_model(self.request)
+            objects_list = queryset.filter(q).values_list(*self.fields)
+        else:
+            objects_list = self.model.objects.all().values_list(*self.fields)
+
+        print('ok')
         response = StreamingHttpResponse(
-            streaming_content=(self.iter_items(self.model.objects.all().values_list(*self.fields), Echo())),
+            streaming_content=(self.iter_items(objects_list, Echo())),
             content_type='text/csv',
         )
         response['Content-Disposition'] = 'attachment;filename=%s.csv' % get_valid_filename(make_searchable(self.model._meta.verbose_name))
@@ -230,7 +238,7 @@ class ViewSet(object):
         View.no_permission = self.Vgetattr(View, 'no_permission')
         if not View.no_permission: View.permission_required = (self.model().perm(view),)
         for k, v in kwargs.items(): setattr(View, k, v)
-        if view == 'list':
+        if view == 'list' or view == 'export':
             if self.filter_model is not None:
                 View.filter_model = self.filter_model
         return View

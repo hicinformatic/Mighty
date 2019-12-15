@@ -39,7 +39,7 @@ class Command(BaseCommand):
                 else: self.logger.info('Line %s/%s' % (self.current_row, self.total_rows))
                 if self.current_row > 1:
                     if self.check_row(row): self.do_line(row)
-                    else: self.logger.error('Check datas failed')
+                    else: self.error.add("Check Failed", "Fields: %s" % self.fields_retrieve, self.current_row)
                 self.current_row += 1
     
     def do_line(self, row):
