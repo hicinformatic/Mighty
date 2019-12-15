@@ -1,6 +1,16 @@
 /* Init default */
 html, body { margin: 0 auto;}
 h1, h2, h3, h4, h5, p, ul, li { margin: 0;}
+.z1 { z-index: 1; }
+.z2 { z-index: 2; }
+.z3 { z-index: 3; }
+.z4 { z-index: 4; }
+.z5 { z-index: 5; }
+.z6 { z-index: 6; }
+.z7 { z-index: 7; }
+.z8 { z-index: 8; }
+.z9 { z-index: 9; }
+
 * { box-sizing: border-box; }
 
 /* Widgets */

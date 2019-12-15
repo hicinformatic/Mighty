@@ -9,6 +9,7 @@ serializer = (
     'ipv4',
     'ipv6',
     'date_create',
+    'image_url',
 )
 
 lst = ('last_name', 'first_name', 'email', 'phone', 'gender',)
