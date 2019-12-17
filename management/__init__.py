@@ -249,21 +249,24 @@ class BaseCommand(BaseCommand):
     def good_field(self, field):
         return self.fields_associates[field] if field in self.fields_associates else field
 
+    def uncomment(self, field, sfield, row):
+        if field in self.fields_uncomment or field in self.fields_keepcomment:
+            nfield = self.split_comment(row[sfield])
+            if nfield:
+                value = nfield.group(1)
+                comment = nfield.group(2)
+                row[sfield] = value.strip() if self.test(value) else None
+                if field in self.fields_keepcomment:
+                    if field in self.alerts:
+                        self.alerts[field].append(comment.strip()) 
+                    else:
+                        self.alerts[field] = [comment.strip(),]
+
     def field(self, field, row):
         alert = False
         sfield = self.good_field(field)
         if sfield in row:
-            if field in self.fields_uncomment or field in self.fields_keepcomment:
-                nfield = self.split_comment(row[sfield])
-                if nfield:
-                    value = nfield.group(1)
-                    comment = nfield.group(2)
-                    row[sfield] = value.strip() if self.test(value) else None
-                    if field in self.fields_keepcomment:
-                        if field in self.alerts:
-                            self.alerts[field].append(comment.strip()) 
-                        else:
-                            self.alerts[field] = [comment.strip(),]
+            self.uncomment(field, sfield, row)
             if hasattr(self, 'get_%s' % field):
                 return getattr(self, 'get_%s' % field)(row[sfield].strip())
             elif self.test(row[sfield]):

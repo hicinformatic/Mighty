@@ -5,7 +5,12 @@ import os
 
 Storage = import_string(settings.STORAGE)
 
+def setting(name, default=None):
+    return getattr(settings, name, default)
+
 class CloudStorage(Storage):
+    container_name = setting('SWIFT_CONTAINER_NAME')
+
     def _save_backup(self, name, content):
         content.seek(0)
         filename = "%s/%s" % (settings.MEDIA_ROOT, name)
