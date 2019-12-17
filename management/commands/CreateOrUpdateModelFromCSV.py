@@ -38,10 +38,18 @@ class Command(BaseCommand):
                 if self.pbar: self.progressBar(self.current_row, self.total_rows)
                 else: self.logger.info('Line %s/%s' % (self.current_row, self.total_rows))
                 if self.current_row > 1:
-                    if self.check_row(row): self.do_line(row)
+                    if self.check_row(row):
+                        self.before_line(row)
+                        self.do_line(row)
                     else: self.error.add("Check Failed", "Fields: %s" % self.fields_retrieve, self.current_row)
                 self.current_row += 1
     
+    def before_line(self, row):
+        pass
+
+    def after_line(self, row, obj):
+        pass
+
     def do_line(self, row):
         self.current_datas = row
         self.alerts = {}
@@ -74,4 +82,5 @@ class Command(BaseCommand):
                 for alert in self.alerts[afield]:
                     obj.add_alert(alert, afield)
             obj.save()
+            self.after_line(row, obj)
         

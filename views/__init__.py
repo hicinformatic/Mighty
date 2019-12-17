@@ -218,9 +218,10 @@ class ViewSet(object):
     add_to_context = {}
     is_ajax = False
 
-    def Vgetattr(self, view, attr, default=False):
-        if hasattr(view, '%s' % attr): return getattr(view, '%s' % attr)
+    def Vgetattr(self, View, view, attr, default=False):
         if hasattr(self, '%s_%s' % (view, attr)): return getattr(self, '%s_%s' % (view, attr))
+        if hasattr(view, '%s' % attr): return getattr(view, '%s' % attr)
+        if hasattr(self, attr): return getattr(self, attr)
         return default
 
     def __init__(self):
@@ -231,11 +232,10 @@ class ViewSet(object):
     def view(self, view, *args, **kwargs):
         View = type(view, (self.views[view]['view'],), {})
         View.model = self.model
-        View.fields = self.fields
-        View.add_to_context = getattr(self, '%s_add_to_context' % view) if hasattr(self, '%s_add_to_context' % view) else self.add_to_context
-        View.is_ajax = getattr(self, '%s_is_ajax' % view) if hasattr(self, '%s_is_ajax' % view) else self.is_ajax
-        View.fields = getattr(self, '%s_fields' % view) if hasattr(self, '%s_fields' % view) else self.fields
-        View.no_permission = self.Vgetattr(View, 'no_permission')
+        View.fields = self.Vgetattr(View, view, 'fields')
+        View.add_to_context = self.Vgetattr(View, view, 'add_to_context')
+        View.is_ajax = self.Vgetattr(View, view, 'is_ajax')
+        View.no_permission = self.Vgetattr(View, view, 'no_permission')
         if not View.no_permission: View.permission_required = (self.model().perm(view),)
         for k, v in kwargs.items(): setattr(View, k, v)
         if view not in ['detail', 'change', 'delete', 'enable', 'disable']:
