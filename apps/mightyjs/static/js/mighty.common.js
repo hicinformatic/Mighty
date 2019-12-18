@@ -190,7 +190,7 @@ function Mcommon(url, options) {
         } else {
             var html = template({"datas": response});
         }
-        if (self.is('init', true)) {
+        if (this.is('init', true)) {
             if (action) {
                 document.getElementById(config).innerHTML = document.getElementById(config).innerHTML + html;
             } else {
