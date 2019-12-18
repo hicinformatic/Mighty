@@ -52,10 +52,11 @@ class ApiModelViewSet(ModelViewSet):
 
     def view(self, view, *args, **kwargs):
         View = super().view(view)
-        View.permission_classes = self.permission_classes
-        View.queryset = self.queryset
-        View.serializer_class = self.serializer_class
-        View.lookup_field = self.lookup_field
+        View.permission_classes = self.Vgetattr(View, view, 'permission_classes')
+        View.queryset = self.Vgetattr(View, view, 'queryset')
+        View.serializer_class = self.Vgetattr(View, view, 'serializer_class')
+        View.lookup_field = self.Vgetattr(View, view, 'lookup_field')
+        View.filter_model = self.Vgetattr(View, view, 'filter_model')
         return View
 
     def name(self, view):

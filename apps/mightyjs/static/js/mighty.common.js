@@ -163,9 +163,16 @@ function Mcommon(url, options) {
         source = source.replace(/\[\[/g, '{{');
         source = source.replace(/\]\]/g, '}}');
         var template = Handlebars.compile(source);
-        var html = template({"datas": response[this.ajax.results]});
+        if (response.hasOwnProperty(this.ajax.results)) {
+            var html = template({"datas": response[this.ajax.results]});
+        } else {
+            var html = template({"datas": response});
+        }
         document.getElementById(config).innerHTML = html;
         this.protect(config, false);
+        this.after(config, response);
     }
+
+    this.after = function (config, response) { }
 
 }
