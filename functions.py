@@ -1,6 +1,7 @@
 from django.utils.six.moves import input
 from django.apps import apps
 from mighty.apps import MightyConfig
+from django.db.models import F, Func
 from Crypto import Cipher, Random
 import base64, datetime, string, random, unicodedata, re
 
@@ -8,6 +9,10 @@ BS = MightyConfig.Crypto.BS
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
 unpad = lambda s : s[:-ord(s[len(s)-1:])]
 numeric_const_pattern = '[-+]? (?: (?: \d* [\.,] \d+ ) | (?: \d+ [\.,]? ) )(?: [Ee] [+-]? \d+ ) ?'
+
+class Round(Func):
+  function = 'ROUND'
+  arity = 2
 
 def test(input_str=None, search=MightyConfig.Test.search):
     return True if str(input_str).strip().lower().replace(' ', '') not in search else False
