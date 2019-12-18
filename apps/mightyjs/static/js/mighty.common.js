@@ -24,10 +24,17 @@ function Mcommon(url, options) {
         }
     }
 
-    this.delay = function(config, ms) {
-        clearTimeout(this.timer[config]);
-        var self = this;
-        this.timer[config] = setTimeout(function() { self.xhr(config); }, ms || 0);
+    this.delay = function(config, ms, action) {
+        if (action == "bottom") {
+            if (!this.is("blocked", true)) {
+                this.xhr(config, action);
+            }
+        } else {
+            delete this.questions.is["blocked"];
+            clearTimeout(this.timer[config]);
+            var self = this;
+            this.timer[config] = setTimeout(function() { self.xhr(config, action); }, ms || 0);
+        }
     }
 
     this.last = function(config, what, like) {
@@ -82,16 +89,16 @@ function Mcommon(url, options) {
 
     this.addEvent = function(evnt, elem, func) {
         if (elem.addEventListener)  // W3C DOM
-           elem.addEventListener(evnt,func,false);
+            elem.addEventListener(evnt,func,false);
         else if (elem.attachEvent) { // IE DOM
-           elem.attachEvent("on"+evnt, func);
+            elem.attachEvent("on"+evnt, func);
         }
         else { // No much to do
-           elem["on"+evnt] = func;
+            elem["on"+evnt] = func;
         }
      }
 
-    this.xhr = function(config) {
+    this.xhr = function(config, action) {
         this.protect(config);
         var self = this;
         var url = this.config[config].hasOwnProperty("url") ? this.config[config]["url"] : this.url;
@@ -99,33 +106,42 @@ function Mcommon(url, options) {
         var method = this.config[config].hasOwnProperty("method") ? this.config[config]["method"] : this.method;
         var datatype = this.config[config].hasOwnProperty("datatype") ? this.config[config]["datatype"] : this.datatype;
         var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-        if (method=="GET" && datas) {
-            self.log("log", "datas", datas);
-            url = url + "?" + datas;
-        }
-        xhttp.open(method, url, true);
-        xhttp.timeout = this.config[config].hasOwnProperty("method") ? this.config[config]["timeout"] : this.timeout;
-        xhttp.onprogress = function () {
-            self.log("log", "onprogress - url: "+url+", method: "+method+", config: "+config);
-        };
-        xhttp.onload = function (e) {
-            self.log("log", "onload - url: "+url+", datatype: "+datatype, xhttp.response);
-            if (datatype == "json") self.template(config, JSON.parse(xhttp.response));
-            if (datas) {
-                window.history.replaceState("", "", "?" + datas);
-            }else{
-                window.history.replaceState("", "", self.burl);
+        if (method=="GET") {
+            if (action == "bottom" && self.config[config]["response"]["next"]) {
+                url = self.config[config]["response"]["next"];
+            } else if (datas) {
+                self.log("log", "datas", datas);
+                url = url + "?" + datas;
             }
-        };
-        xhttp.onabort = function (e) {
-            self.log("error", "onabort - url: "+url+", method: "+method+", config: "+config, e);
-            self.protect(config, false);
-        };
-        xhttp.onerror = function (e) {
-            self.log("error", "onerror - url: "+url+", method: "+method+", config: "+config, e);
-            self.protect(config, false);
-        };
-        xhttp.send(datas);
+        }
+        if(this.last(config, "url", url) || this.last(config, "datas", datas)){
+            this.last(config, {key: "url", value: url});
+            this.last(config, {key: "datas", value: datas});
+            xhttp.open(method, url, true);
+            xhttp.timeout = this.config[config].hasOwnProperty("method") ? this.config[config]["timeout"] : this.timeout;
+            xhttp.onprogress = function () {
+                self.log("log", "onprogress - url: "+url+", method: "+method+", config: "+config);
+            };
+            xhttp.onload = function (e) {
+                self.log("log", "onload - url: "+url+", datatype: "+datatype, xhttp.response);
+                self.config[config]["response"] = JSON.parse(xhttp.response);
+                if (datatype == "json") self.template(config, self.config[config]["response"], action);
+                if (datas) {
+                    window.history.replaceState("", "", "?" + datas);
+                }else{
+                    window.history.replaceState("", "", self.burl);
+                }
+            };
+            xhttp.onabort = function (e) {
+                self.log("error", "onabort - url: "+url+", method: "+method+", config: "+config, e);
+                self.protect(config, false);
+            };
+            xhttp.onerror = function (e) {
+                self.log("error", "onerror - url: "+url+", method: "+method+", config: "+config, e);
+                self.protect(config, false);
+            };
+            xhttp.send(datas);
+        }
     }
 
     this.protect = function(config, status){
@@ -135,11 +151,15 @@ function Mcommon(url, options) {
         }
     }
 
-    this.process = function(ms) {
+    this.process = function(ms, action) {
+        action = action === undefined ? false : action;
         ms = ms === undefined ? 500 : ms;
         for (config in this.config) {
-            this.delay(config, ms);
+            this.delay(config, ms, action);
             //this.xhr(config);
+        }
+        if (this.is("bottom")){
+            this.bottom();
         }
     }
 
@@ -151,6 +171,7 @@ function Mcommon(url, options) {
         self = this;
         if (searchable) {
            this.addEvent('keyup', document.getElementById(searchable), function(e) {
+                document.getElementById(searchable).scrollIntoView();
                 self.form.search = this.value;
                 self.process(500);
             });
@@ -158,7 +179,8 @@ function Mcommon(url, options) {
         }
     }
 
-    this.template = function(config, response) {
+    this.template = function(config, response, action) {
+        action = action === undefined ? false : action;
         var source = document.getElementById("template-"+config).innerHTML;
         source = source.replace(/\[\[/g, '{{');
         source = source.replace(/\]\]/g, '}}');
@@ -168,11 +190,28 @@ function Mcommon(url, options) {
         } else {
             var html = template({"datas": response});
         }
-        document.getElementById(config).innerHTML = html;
+        if (self.is('init', true)) {
+            if (action) {
+                document.getElementById(config).innerHTML = document.getElementById(config).innerHTML + html;
+            } else {
+                document.getElementById(config).innerHTML = html;
+            }
+        } else {
+            document.getElementById(config).innerHTML = html;
+        }
         this.protect(config, false);
         this.after(config, response);
+        delete this.questions.is["blocked"];
     }
 
     this.after = function (config, response) { }
 
+    this.bottom = function() {
+        var self = this;
+        this.addEvent("scroll", window, function(){
+            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+                self.process(0, "bottom");
+            }
+        });
+    }
 }
