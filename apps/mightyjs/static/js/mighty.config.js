@@ -24,6 +24,7 @@ function Mconfig(url, options) {
     this.steps = {ready: 0, prepare: 1, send: 2, success: 3, complete: 4, error: 5,};
     this.canshared = ["search", "searchex", "filter", "filterand", "filteror", "exclude", "excludeand", "excludeor"];
     this.cantshared = ["order", "distinct", "page"];
+    this.actions = {top: "-top", previous: "-previous", next: "-next",}
 
     this.ajax = {
         count: "count",

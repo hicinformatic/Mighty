@@ -102,14 +102,13 @@ function Mcommon(url, options) {
         this.protect(config);
         var self = this;
         var url = this.config[config].hasOwnProperty("url") ? this.config[config]["url"] : this.url;
+        if (action == "next" && this.config[config]["response"]["next"]) { url = this.config[config]["response"]["next"]; }
         var datas = this.config[config].hasOwnProperty("datas") ? this.serialize(this.config[config]["datas"]) : this.serialize(this.form);
         var method = this.config[config].hasOwnProperty("method") ? this.config[config]["method"] : this.method;
         var datatype = this.config[config].hasOwnProperty("datatype") ? this.config[config]["datatype"] : this.datatype;
         var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
         if (method=="GET") {
-            if (action == "bottom" && self.config[config]["response"]["next"]) {
-                url = self.config[config]["response"]["next"];
-            } else if (datas) {
+            if (datas) {
                 self.log("log", "datas", datas);
                 url = url + "?" + datas;
             }
@@ -151,15 +150,19 @@ function Mcommon(url, options) {
         }
     }
 
+    this.processconfig = function(config, ms, action) {
+        action = action === undefined ? false : action;
+        ms = ms === undefined ? 500 : ms;
+        this.delay(config, ms, action);
+
+    }
+
     this.process = function(ms, action) {
         action = action === undefined ? false : action;
         ms = ms === undefined ? 500 : ms;
         for (config in this.config) {
-            this.delay(config, ms, action);
-            //this.xhr(config);
-        }
-        if (this.is("bottom")){
-            this.bottom();
+            this.processconfig(config, ms, action);
+            if (this.is("bottom")){ this.bottom(config); }
         }
     }
 
@@ -171,7 +174,7 @@ function Mcommon(url, options) {
         self = this;
         if (searchable) {
            this.addEvent('keyup', document.getElementById(searchable), function(e) {
-                document.getElementById(searchable).scrollIntoView();
+                document.getElementById(config + "-top").scrollIntoView();
                 self.form.search = this.value;
                 self.process(500);
             });
@@ -186,19 +189,25 @@ function Mcommon(url, options) {
         source = source.replace(/\]\]/g, '}}');
         var template = Handlebars.compile(source);
         if (response.hasOwnProperty(this.ajax.results)) {
-            var html = template({"datas": response[this.ajax.results]});
+            var results = response[this.ajax.results];
+            delete response[this.ajax.results];
+            console.log(results);
+            var html = template({"datas": results, "options": response});
         } else {
             var html = template({"datas": response});
         }
         if (this.is('init', true)) {
-            if (action) {
+            if (action == "bottom") {
                 document.getElementById(config).innerHTML = document.getElementById(config).innerHTML + html;
             } else {
                 document.getElementById(config).innerHTML = html;
             }
         } else {
             document.getElementById(config).innerHTML = html;
+            
         }
+        if (this.is("next")){ this.next(config); }
+        if (this.is("previous")){ this.previous(config); }
         this.protect(config, false);
         this.after(config, response);
         delete this.questions.is["blocked"];
@@ -206,12 +215,29 @@ function Mcommon(url, options) {
 
     this.after = function (config, response) { }
 
-    this.bottom = function() {
+    //this.bottom = function(config) {
+    //    var self = this;
+    //    this.addEvent("scroll", window, function(){
+    //        if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+    //            self.processconfig(config, 0, "bottom");
+    //        }
+    //    });
+    //}
+
+    this.previous = function(config) {
         var self = this;
-        this.addEvent("scroll", window, function(){
-            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
-                self.process(0, "bottom");
-            }
+        this.addEvent("click", document.getElementById(config + this.actions.previous), function(e) {
+            self.processconfig(config, 0, "previous");
+            document.getElementById(config + self.actions.top).scrollIntoView();
         });
     }
+
+    this.next = function(config) {
+        var self = this;
+        this.addEvent("click", document.getElementById(config + this.actions.next), function(e) {
+            self.processconfig(config, 0, "next");
+            document.getElementById(config + self.actions.top).scrollIntoView();
+        });
+    }
+
 }
