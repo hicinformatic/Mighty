@@ -154,7 +154,6 @@ function Mcommon(url, options) {
         action = action === undefined ? false : action;
         ms = ms === undefined ? 500 : ms;
         this.delay(config, ms, action);
-
     }
 
     this.process = function(ms, action) {
@@ -166,6 +165,12 @@ function Mcommon(url, options) {
         }
     }
 
+    this.top = function() {
+        if (this.is("top")) {
+            document.getElementById(this.is("top")).scrollIntoView();
+        }
+    }
+
     this.events = function() {
         this.searchable(this.is("searchable"));
     }
@@ -174,7 +179,7 @@ function Mcommon(url, options) {
         self = this;
         if (searchable) {
            this.addEvent('keyup', document.getElementById(searchable), function(e) {
-                document.getElementById(config + "-top").scrollIntoView();
+                self.top();
                 self.form.search = this.value;
                 self.process(500);
             });
@@ -184,7 +189,9 @@ function Mcommon(url, options) {
 
     this.template = function(config, response, action) {
         action = action === undefined ? false : action;
-        var source = document.getElementById(this.actions.template + config).innerHTML;
+        var source = this.config[config].hasOwnProperty("template") ? this.config[config]["template"] : this.actions.template + config;
+        this.log("debug", "template config: "+source);
+        source = document.getElementById(source).innerHTML;
         source = source.replace(/\[\[/g, '{{');
         source = source.replace(/\]\]/g, '}}');
         var template = Handlebars.compile(source);
@@ -227,7 +234,7 @@ function Mcommon(url, options) {
         var self = this;
         this.addEvent("click", document.getElementById(config + this.actions.previous), function(e) {
             self.processconfig(config, 0, "previous");
-            document.getElementById(config + self.actions.top).scrollIntoView();
+            self.top();
         });
     }
 
@@ -235,7 +242,7 @@ function Mcommon(url, options) {
         var self = this;
         this.addEvent("click", document.getElementById(config + this.actions.next), function(e) {
             self.processconfig(config, 0, "next");
-            document.getElementById(config + self.actions.top).scrollIntoView();
+            self.top();
         });
     }
 
