@@ -184,14 +184,13 @@ function Mcommon(url, options) {
 
     this.template = function(config, response, action) {
         action = action === undefined ? false : action;
-        var source = document.getElementById("template-"+config).innerHTML;
+        var source = document.getElementById(this.actions.template + config).innerHTML;
         source = source.replace(/\[\[/g, '{{');
         source = source.replace(/\]\]/g, '}}');
         var template = Handlebars.compile(source);
         if (response.hasOwnProperty(this.ajax.results)) {
             var results = response[this.ajax.results];
             delete response[this.ajax.results];
-            console.log(results);
             var html = template({"datas": results, "options": response});
         } else {
             var html = template({"datas": response});
