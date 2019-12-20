@@ -49,3 +49,7 @@ def add_attr(field, css):
             key, val = d.split(':')
             attrs[key] = val
     return field.as_widget(attrs=attrs)
+
+@register.simple_tag(name='number_hread')
+def number_hread(number, separator=None):
+    return '{:,}'.format(number).replace(",", separator) if separator else '{:,}'.format(number)
