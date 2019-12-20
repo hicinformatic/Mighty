@@ -121,8 +121,8 @@ class BaseView(PermissionRequiredMixin):
     def get_queryset(self):
         if self.is_ajax: return self.model.objects.none()
         if self.filter_model is None: return super().get_queryset()
-        else: queryset, q = self.filter_model(self.request)
-        return queryset.filter(q)
+        else: return self.filter_model(self.request)
+        #return queryset.filter(q)
 
 class FormView(BaseView, FormView):
     pass

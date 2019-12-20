@@ -57,6 +57,10 @@ class Filter(object):
                 "param": "distinct",
                 "fields": {},
             },
+            "limit": {
+                "param": "limit",
+                "fields": {},
+            }
         }
 
     def operators(self, param):
@@ -96,6 +100,10 @@ class Filter(object):
     def order(self):
         order_param = self.request.GET.get(self.param("order"))
         return order_param.split() if test(order_param) else list(self.fields("order").keys())
+
+    def limit(self):
+        limit_param = self.request.GET.get(self.param("limit"))
+        return limit_param.split(":") if test(limit_param) else False
 
     def getQ_range(self, param, field, value, *args, **kwargs):
         operator = kwargs["operator"] if "operator" in kwargs else Q.AND
@@ -235,4 +243,7 @@ class Filter(object):
             if self.prefetch_related: dqueryset = dqueryset.prefetch_related(*self.prefetch_related)
             q.add(Q(id__in=dqueryset.filter(q).order_by(*distinct).distinct(*distinct).values_list('id', flat=True)), Q.AND)
 
-        return queryset, q
+        limit = self.limit()
+        if limit:
+            return queryset.filter(q)[int(limit[0]):int(limit[1])]
+        return queryset.filter(q)

@@ -55,4 +55,5 @@ if 'rest_framework' in settings.INSTALLED_APPS:
 
         def __init__(self, model=None):
             super(UserApiViewSet, self).__init__()
-            self.addView('me', UserMeApi, '%s/me/')
+            self.addView('me', UserMeApi, 'me/')
+            self.addNotuseid('me')

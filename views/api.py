@@ -8,8 +8,8 @@ from mighty.permissions import HasMightyPermission
 class ListAPIView(ListAPIView):
     def get_queryset(self):
         if self.filter_model is None: return super().get_queryset()
-        else: queryset, q = self.filter_model(self.request)
-        return queryset.filter(q)
+        else: return self.filter_model(self.request)
+        #return queryset.filter(q)
 
 class DisableApiView(DestroyAPIView):
     def delete(self, request, *args, **kwargs):
