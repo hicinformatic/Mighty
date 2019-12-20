@@ -220,7 +220,7 @@ class ViewSet(object):
 
     def Vgetattr(self, View, view, attr, default=False):
         if hasattr(self, '%s_%s' % (view, attr)): return getattr(self, '%s_%s' % (view, attr))
-        if hasattr(view, '%s' % attr): return getattr(view, '%s' % attr)
+        if hasattr(View, attr): return getattr(View, attr)
         if hasattr(self, attr): return getattr(self, attr)
         return default
 
