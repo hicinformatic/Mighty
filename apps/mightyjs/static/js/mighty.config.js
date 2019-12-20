@@ -29,6 +29,8 @@ function Mconfig(url, options) {
     this.ajax = {
         count: "count",
         results: "results",
+        next: "next",
+        previous: "previous",
     }
 
     this.colors = {

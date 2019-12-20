@@ -187,6 +187,15 @@ function Mcommon(url, options) {
         }
     }
 
+    this.exportable = function(exportable) {
+        alert('ouii');
+        for (config in this.config) {
+            if (this.config[config]["export"]) {
+                alert(document.getElementById(this.config[config]["export"]).href);
+            }
+        }
+    }
+
     this.template = function(config, response, action) {
         action = action === undefined ? false : action;
         var source = this.config[config].hasOwnProperty("template") ? this.config[config]["template"] : this.actions.template + config;
@@ -212,8 +221,8 @@ function Mcommon(url, options) {
             document.getElementById(config).innerHTML = html;
             
         }
-        if (this.is("next")){ this.next(config); }
-        if (this.is("previous")){ this.previous(config); }
+        if (this.is("next")){ this.next(config, response); }
+        if (this.is("previous")){ this.previous(config, response); }
         this.protect(config, false);
         this.after(config, response);
         delete this.questions.is["blocked"];
@@ -230,20 +239,24 @@ function Mcommon(url, options) {
     //    });
     //}
 
-    this.previous = function(config) {
+    this.previous = function(config, response) {
         var self = this;
-        this.addEvent("click", document.getElementById(config + this.actions.previous), function(e) {
-            self.processconfig(config, 0, "previous");
-            self.top();
-        });
+        if (response[this.ajax.previous]) {
+            this.addEvent("click", document.getElementById(config + this.actions.previous), function(e) {
+                self.processconfig(config, 0, "previous");
+                self.top();
+            });
+        }
     }
 
-    this.next = function(config) {
+    this.next = function(config, response) {
         var self = this;
-        this.addEvent("click", document.getElementById(config + this.actions.next), function(e) {
-            self.processconfig(config, 0, "next");
-            self.top();
-        });
+        if (response[this.ajax.next]) {
+            this.addEvent("click", document.getElementById(config + this.actions.next), function(e) {
+                self.processconfig(config, 0, "next");
+                self.top();
+            });
+        }
     }
 
 }
