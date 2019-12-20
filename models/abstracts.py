@@ -382,7 +382,7 @@ class ModelFile(ModelBase, ModelUid):
 
     @property
     def filename(self):
-        return os.path.basename(self.the_file.name)
+        return self.file_name if self.file_name else os.path.basename(self.the_file.name)
 
     @property
     def valid_filename(self):

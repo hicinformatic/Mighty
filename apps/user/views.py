@@ -4,11 +4,15 @@ from mighty.models.user import User
 from mighty.apps.user import filters, fields
 
 class UserMe(DetailView):
+    no_permission = True
     def get_header(self):
         return {'title': 'me',}
 
     def get_object(self, queryset=None):
-        return self.request.user
+        user = User.objects.get(id=self.request.user.id)
+        print(user)
+        print(self.request.user.has_perm(user.perm('detail')))
+        return None
 
     def get_context_data(self, **kwargs):
         context = super(UserMe, self).get_context_data(**kwargs)
@@ -28,13 +32,19 @@ class UserViewSet(ModelViewSet):
     fields = fields.lst
 
     def __init__(self, model=None):
-        super().__init__()
+        super(UserViewSet, self).__init__()
         self.addNotuseid('me')
         self.addView('me', UserMe, 'me/')
 
 if 'rest_framework' in settings.INSTALLED_APPS:
     from mighty.views.api import ApiModelViewSet
     from mighty.apps.user.serializers import UserSerializer
+    from rest_framework.generics import RetrieveAPIView
+
+    class UserMeApi(RetrieveAPIView):
+        slug = '<uuid:uid>'
+        def get_object(self):
+            return User.objects.get(id=52)
 
     class UserApiViewSet(ApiModelViewSet):
         queryset = User.objects.all()
@@ -42,3 +52,7 @@ if 'rest_framework' in settings.INSTALLED_APPS:
         filter_model = filters.UserFilter
         model = User
         serializer_class = UserSerializer
+
+        def __init__(self, model=None):
+            super(UserApiViewSet, self).__init__()
+            self.addView('me', UserMeApi, '%s/me/')

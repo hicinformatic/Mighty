@@ -118,6 +118,12 @@ class BaseView(PermissionRequiredMixin):
         if self.has_model(): context.update({'opts': self.model._meta})
         return context
 
+    def get_queryset(self):
+        if self.is_ajax: return self.model.objects.none()
+        if self.filter_model is None: return super().get_queryset()
+        else: queryset, q = self.filter_model(self.request)
+        return queryset.filter(q)
+
 class FormView(BaseView, FormView):
     pass
 
@@ -131,11 +137,8 @@ class TemplateView(BaseView, TemplateView):
     pass    
 
 class ListView(BaseView, ListView):
-    def get_queryset(self):
-        if self.is_ajax: return self.model.objects.none()
-        if self.filter_model is None: return super().get_queryset()
-        else: queryset, q = self.filter_model(self.request)
-        return queryset.filter(q)
+    pass
+
 
 class ChangeView(BaseView, UpdateView):
     def get_success_url(self):
@@ -185,8 +188,6 @@ class ExportView(ListView):
             objects_list = queryset.filter(q).values_list(*self.fields)
         else:
             objects_list = self.model.objects.all().values_list(*self.fields)
-
-        print('ok')
         response = StreamingHttpResponse(
             streaming_content=(self.iter_items(objects_list, Echo())),
             content_type='text/csv',
@@ -211,17 +212,14 @@ class AdminView(object):
 
 class ViewSet(object):
     views = {}
-    fields = ()
     excluded_views = ()
     notuseid = []
     filter_model = None
-    add_to_context = {}
-    is_ajax = False
 
     def Vgetattr(self, View, view, attr, default=False):
-        if hasattr(self, '%s_%s' % (view, attr)): return getattr(self, '%s_%s' % (view, attr))
-        if hasattr(View, attr): return getattr(View, attr)
-        if hasattr(self, attr): return getattr(self, attr)
+        if hasattr(self, attr) and getattr(self, attr): return getattr(self, attr)
+        if hasattr(View, attr) and getattr(View, attr): return getattr(View, attr)
+        if hasattr(self, '%s_%s' % (view, attr)) and getattr(self, '%s_%s' % (view, attr)): return getattr(self, '%s_%s' % (view, attr))
         return default
 
     def __init__(self):
@@ -232,8 +230,8 @@ class ViewSet(object):
     def view(self, view, *args, **kwargs):
         View = type(view, (self.views[view]['view'],), {})
         View.model = self.model
-        View.fields = self.Vgetattr(View, view, 'fields')
-        View.add_to_context = self.Vgetattr(View, view, 'add_to_context')
+        View.fields = self.Vgetattr(View, view, 'fields', ())
+        View.add_to_context = self.Vgetattr(View, view, 'add_to_context', {})
         View.is_ajax = self.Vgetattr(View, view, 'is_ajax')
         View.no_permission = self.Vgetattr(View, view, 'no_permission')
         if not View.no_permission: View.permission_required = (self.model().perm(view),)
@@ -261,11 +259,9 @@ class ViewSet(object):
     def urls(self):
         return [path(self.url(view, config), self.view(view).as_view(), name=self.name(view)) for view,config in self.views.items()]
 
-
 class ModelViewSet(ViewSet):
     model = None
     fields = '__all__'
-    notuseid = ['list', 'add', 'export', 'import']
     slug = '<uuid:uid>'
     views = {
         'list':    { 'view': ListView, 'url': '' },
@@ -280,6 +276,7 @@ class ModelViewSet(ViewSet):
     }
 
     def __init__(self, model=None):
-        super().__init__()
+        super(ModelViewSet, self).__init__()
+        self.notuseid = ['list', 'add', 'export', 'import']
         if model is not None:
             self.model = model

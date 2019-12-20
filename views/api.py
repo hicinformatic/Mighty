@@ -7,10 +7,8 @@ from mighty.permissions import HasMightyPermission
 
 class ListAPIView(ListAPIView):
     def get_queryset(self):
-        if self.filter_model is None:
-            return super().get_queryset()
-        else:
-            queryset, q = self.filter_model(self.request)
+        if self.filter_model is None: return super().get_queryset()
+        else: queryset, q = self.filter_model(self.request)
         return queryset.filter(q)
 
 class DisableApiView(DestroyAPIView):
@@ -40,6 +38,7 @@ class EnableApiView(DestroyAPIView):
 class ApiModelViewSet(ModelViewSet):
     permission_classes = [HasMightyPermission]
     lookup_field = 'uid'
+    queryset = None
     views = {
         'list':    { 'view': ListAPIView, 'url': '' },
         'add':     { 'view': CreateAPIView, 'url': 'add/' },
@@ -53,10 +52,9 @@ class ApiModelViewSet(ModelViewSet):
     def view(self, view, *args, **kwargs):
         View = super().view(view)
         View.permission_classes = self.Vgetattr(View, view, 'permission_classes')
-        View.queryset = self.Vgetattr(View, view, 'queryset')
-        View.serializer_class = self.Vgetattr(View, view, 'serializer_class')
+        View.serializer_class = self.Vgetattr(View, view, 'serializer_class', self.model.objects.all())
         View.lookup_field = self.Vgetattr(View, view, 'lookup_field')
-        View.filter_model = self.Vgetattr(View, view, 'filter_model')
+        View.queryset = self.queryset
         return View
 
     def name(self, view):

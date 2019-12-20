@@ -9,10 +9,10 @@ def setting(name, default=None):
     return getattr(settings, name, default)
 
 class CloudStorage(Storage):
-    def __init__(self, **settings):
-        for name, value in settings.items():
-            setattr(self, name, value)
-        super().__init__(self, settings)
+    #def __init__(self, **settings):
+    #    for name, value in settings.items():
+    #        setattr(self, name, value)
+    #    super().__init__(self, settings)
 
     def _save_backup(self, name, content):
         content.seek(0)
